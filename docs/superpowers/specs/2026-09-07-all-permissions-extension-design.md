@@ -83,14 +83,24 @@ tests/
 
 ## Live test modes
 
-- **launch**: Playwright launches Chromium / Chrome for Testing with
-  `--load-extension`. Optional `USER_DATA_DIR` for a user-provided profile,
-  optional `CHROME_PATH` for a specific binary. Default: Playwright's
-  bundled Chromium.
-- **attach**: `CDP_URL` points at a running browser (started with
-  `--remote-debugging-port`) in which the extension was loaded via
-  "Load unpacked". Needed for branded Google Chrome >= 137, which
-  ignores `--load-extension`.
+The extension is loaded with the CDP command `Extensions.loadUnpacked`
+(browser started with `--enable-unsafe-extension-debugging`), which works in
+Chromium, Chrome for Testing and branded Google Chrome >= 137 (the latter
+ignores `--load-extension`). Chromium answers with the extension id or the
+exact manifest error. Playwright's default `--disable-extensions` is dropped.
+
+- **launch**: Playwright launches the browser. Optional `USER_DATA_DIR` for a
+  user-provided profile, optional `CHROME_PATH` for a specific binary.
+  Default: Playwright's bundled Chrome for Testing, headless.
+- **attach**: `CDP_URL` points at a running browser started with
+  `--remote-debugging-port` (+ `--enable-unsafe-extension-debugging`, else
+  the extension must be loaded by hand via "Load unpacked").
+
+After loading, the session enables developer mode and the per-extension
+"Allow User Scripts" toggle through `chrome.developerPrivate` on
+chrome://extensions: developer mode unlocks `chrome.debugger` and makes
+Chromium report manifest warnings (`extension_info_generator.cc`), the
+toggle unlocks `chrome.userScripts`.
 
 The manifest carries a fixed `key`, so the extension id is stable and both
 modes can open `chrome-extension://<id>/probe.html`.
@@ -99,9 +109,10 @@ modes can open `chrome-extension://<id>/probe.html`.
 
 - Static tests run on every change (no browser).
 - Live tests assert: set of granted permissions == expected `available`
-  set; every available permission's probe passes; every unavailable one is
-  not granted and its namespace is absent; content script present in the
-  top frame and in an iframe of a test page.
+  set; every available permission's probe passes (namespace present, harmless
+  call succeeds); every unavailable one is not granted, and Chromium's own
+  manifest warnings name exactly the unavailable set; content script present
+  in the top frame, a nested http frame and an about:blank frame.
 - Probes never do destructive or prompting calls (no clipboard writes, no
   geolocation prompts, no downloads, no keep-awake).
 

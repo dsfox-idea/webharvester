@@ -29,8 +29,12 @@ npm run sync-catalog     # refresh catalog/permissions.json from Chromium main
 npm run build-manifest   # regenerate extension/manifest.json
 ```
 
-The live run attaches `probe-report.json` to the first test (see
-`playwright-report/` or `test-results/`).
+The live run writes `test-results/probe-report.json` and attaches the
+chrome://extensions view of the extension (`extension-info.json`) to the
+warnings test. After loading, the session switches on developer mode and the
+per-extension "Allow User Scripts" toggle through `chrome.developerPrivate`
+on chrome://extensions, because that is what unlocks `chrome.debugger`,
+`chrome.userScripts` and Chromium's manifest warnings.
 
 ## Live tests against your own browser or profile
 
@@ -79,11 +83,11 @@ Environment variables:
   channel, command-line switch, feature flag, session type, allowlist,
   install location, manifest version bounds, behaviour dependencies.
 - Live: the set of granted permissions equals the set the rules predict for
-  the detected environment; every granted permission's API namespace exists
-  (`debugger` and `userScripts` may need developer mode, reported as
-  annotations); every granted permission survives a harmless call; all
-  predicted-unavailable permissions are absent; `<all_urls>` is granted; the
-  content script runs in the top frame, a nested frame and an about:blank frame.
+  the detected environment; every granted permission's API namespace exists;
+  every granted permission survives a harmless call; all predicted-unavailable
+  permissions are absent and Chromium's own manifest warnings name exactly
+  those permissions; `<all_urls>` is granted; the content script runs in the
+  top frame, a nested frame and an about:blank frame.
 
 ## Why some permissions are never granted here
 

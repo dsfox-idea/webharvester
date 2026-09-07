@@ -1,10 +1,11 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { AvailabilityRules, type Channel, type Environment } from './availability.ts';
 import { ChannelDetector } from './channel-detector.ts';
 import { ExtensionIdentity } from './extension-id.ts';
+import { ExtensionsPage } from './extensions-page.ts';
 import { ManifestBuilder } from './manifest-builder.ts';
 import type { ProbeReport } from './probe-report.ts';
 
@@ -39,9 +40,12 @@ export class BrowserSession {
   readonly options: SessionOptions;
   readonly mode: SessionMode;
   readonly extensionId: string;
+  /** True once chrome://extensions developer mode and the user-scripts toggle were switched on. */
+  developerMode = false;
   private browser?: Browser;
   private browserContext?: BrowserContext;
   private env?: Environment;
+  private temporaryProfile?: string;
 
   constructor(options: SessionOptions) {
     this.options = options;
@@ -73,11 +77,17 @@ export class BrowserSession {
   async open(): Promise<void> {
     if (this.mode === 'attach') await this.attach();
     else await this.launch();
+    await this.enableDeveloperTools();
+  }
+
+  get extensionsPage(): ExtensionsPage {
+    return new ExtensionsPage(this.context);
   }
 
   async close(): Promise<void> {
     await this.browserContext?.close();
     await this.browser?.close();
+    if (this.temporaryProfile) rmSync(this.temporaryProfile, { recursive: true, force: true });
   }
 
   /** Opens probe.html and waits for the in-extension probe run to finish. */
@@ -98,6 +108,7 @@ export class BrowserSession {
   private async launch(): Promise<void> {
     const executablePath = this.options.executablePath ?? chromium.executablePath();
     const userDataDir = this.options.userDataDir ?? BrowserSession.freshProfileDir();
+    if (!this.options.userDataDir) this.temporaryProfile = userDataDir;
     console.log(`[session] launch ${executablePath}\n[session] profile ${userDataDir}\n[session] headless ${this.options.headless}`);
     this.browserContext = await chromium.launchPersistentContext(userDataDir, {
       headless: this.options.headless,
@@ -139,6 +150,18 @@ export class BrowserSession {
       throw new Error(`Extensions.loadUnpacked failed for ${this.options.extensionPath}: ${(error as Error).message.split('\n')[0]}`);
     } finally {
       await cdp.detach();
+    }
+  }
+
+  /** Developer mode unlocks chrome.debugger and manifest warnings; the toggle unlocks chrome.userScripts. Best effort. */
+  private async enableDeveloperTools(): Promise<void> {
+    try {
+      await this.extensionsPage.enableDeveloperMode();
+      await this.extensionsPage.allowUserScripts(this.extensionId);
+      this.developerMode = true;
+      console.log('[session] developer mode and user-scripts access enabled');
+    } catch (error) {
+      console.warn(`[session] could not enable developer mode: ${(error as Error).message.split('\n')[0]}`);
     }
   }
 

@@ -1,3 +1,4 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { test as base } from '@playwright/test';
 import { AvailabilityRules, type Verdict } from '../../src/availability.ts';
 import { BrowserSession } from '../../src/browser-session.ts';
@@ -44,7 +45,10 @@ export const test = base.extend<Record<never, never>, WorkerFixtures>({
   ],
   report: [
     async ({ session }, use) => {
-      await use(await session.runProbes());
+      const report = await session.runProbes();
+      mkdirSync('test-results', { recursive: true });
+      writeFileSync('test-results/probe-report.json', `${JSON.stringify(report, null, 2)}\n`);
+      await use(report);
     },
     { scope: 'worker' },
   ],

@@ -1,3 +1,4 @@
+import { ExtensionsPage } from '../../src/extensions-page.ts';
 import { expect, test } from './fixtures.ts';
 
 test.describe('live permissions', () => {
@@ -23,13 +24,13 @@ test.describe('live permissions', () => {
     expect(report.grantedOrigins).toContain('<all_urls>');
   });
 
-  test('exposes the API namespace of every granted permission', async ({ report, expected }, testInfo) => {
+  test('exposes the API namespace of every granted permission', async ({ session, report, expected }, testInfo) => {
     const available = new Set(expected.available);
     const absent: string[] = [];
     for (const result of report.results) {
       if (!available.has(result.permission) || !result.namespace) continue;
       if (result.namespace.present) continue;
-      if (result.conditional) {
+      if (result.conditional && !session.developerMode) {
         testInfo.annotations.push({ type: 'conditional', description: `${result.permission}: ${result.namespace.name} absent, needs ${result.conditional}` });
       } else {
         absent.push(`${result.permission}: ${result.namespace.name}`);
@@ -52,6 +53,16 @@ test.describe('live permissions', () => {
       testInfo.annotations.push({ type: 'unavailable', description: `${name}: ${verdict.reason} (${verdict.detail})` });
     }
     expect(expected.unavailable.filter((e) => granted.has(e.name)).map((e) => e.name)).toEqual([]);
+  });
+
+  test('Chromium warns about exactly the permissions predicted unavailable', async ({ session, expected }, testInfo) => {
+    test.skip(!session.developerMode, 'Chromium reports manifest warnings only in developer mode');
+    const info = await session.extensionsPage.info(session.extensionId);
+    await testInfo.attach('extension-info.json', { body: JSON.stringify(info, null, 2), contentType: 'application/json' });
+    expect(info.state).toBe('ENABLED');
+    expect(info.runtimeErrors).toEqual([]);
+    const warned = [...info.installWarnings, ...info.manifestErrors].map(ExtensionsPage.permissionNamed).filter((name): name is string => !!name);
+    expect([...new Set(warned)].sort()).toEqual(expected.unavailable.map((e) => e.name).sort());
   });
 
   test('service worker is registered', async ({ session }) => {

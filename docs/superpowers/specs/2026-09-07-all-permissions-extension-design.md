@@ -1,0 +1,105 @@
+# webharvester: all-permissions Chromium extension — design
+
+Date: 2026-09-07
+
+## Goal
+
+A Manifest V3 Chromium extension that declares every permission the Chromium
+extension platform lets a regular (non-allowlisted, non-component) extension
+declare, plus full host access, plus a content script on every URL and frame.
+An automated test suite proves which of those permissions are actually
+granted at runtime and that the rest fail in the documented way.
+
+## Source of truth for the permission list
+
+Chromium sources, not docs:
+
+- `extensions/common/api/_permission_features.json`
+- `chrome/common/extensions/api/_permission_features.json`
+- `extensions/common/permissions/extensions_api_permissions.cc`
+- `chrome/common/extensions/permissions/chrome_api_permissions.cc`
+
+Selection rule (implemented by `scripts/sync-catalog.ts`):
+
+1. Take every feature name from both `_permission_features.json` files.
+2. Keep only alternatives whose `extension_types` contains `"extension"`.
+3. Drop names ending in `Private` or containing `Private.` (component-only).
+4. Drop names whose every remaining alternative requires an `allowlist`
+   (Google-internal ids; can never be granted to us).
+5. Drop feature-only names that are not API permissions (`plugin`, `runtime`):
+   verified against the two `*_api_permissions.cc` tables.
+
+Result: 95 declarable permission names, stored in `catalog/permissions.json`
+together with the raw availability alternatives and the Chromium revision.
+
+## Runtime behaviour of unavailable permissions (verified in source)
+
+`extensions/common/manifest_handlers/permissions_parser.cc`, `ParseHelper`:
+a declared permission whose feature is not available for the current
+platform / channel / manifest version / install location is removed from
+the granted set and reported as an install warning. The extension still
+loads. Unknown names produce a "malformed pattern" warning in MV3.
+
+Therefore the manifest declares all 95 names and the tests compute, per
+permission, an expected status for the environment the tests run in:
+
+- `available`
+- `platform` (e.g. ChromeOS-only)
+- `channel` (dev/beta/canary only)
+- `manifest-version` (MV2-only)
+- `location` (policy / component only)
+- `flag` (needs a command-line switch or feature flag)
+
+## Components
+
+```
+extension/
+  manifest.json      generated from the catalog by scripts/build-manifest.ts
+  background.js      service worker; installs probe runner, logs
+  probe.html/js      in-extension probe UI + window.__probeRunner for tests
+  probes/            one Probe class per permission (namespace + harmless call)
+  content.js         content script on <all_urls>, all frames; marks the frame
+catalog/
+  permissions.json   generated; the only permission list in the repo
+scripts/
+  sync-catalog.ts    fetch Chromium sources -> catalog
+  build-manifest.ts  catalog -> extension/manifest.json
+src/
+  catalog.ts         PermissionCatalog (load/parse)
+  availability.ts    AvailabilityRules: expected status per environment
+  extension-id.ts    ExtensionIdentity: id from manifest.key
+  browser-session.ts BrowserSession: launch (flags) or attach (CDP)
+tests/
+  static/*.spec.ts   manifest == catalog, availability rules, extension id
+  live/*.spec.ts     permissions granted, probes, content script injection
+```
+
+## Live test modes
+
+- **launch**: Playwright launches Chromium / Chrome for Testing with
+  `--load-extension`. Optional `USER_DATA_DIR` for a user-provided profile,
+  optional `CHROME_PATH` for a specific binary. Default: Playwright's
+  bundled Chromium.
+- **attach**: `CDP_URL` points at a running browser (started with
+  `--remote-debugging-port`) in which the extension was loaded via
+  "Load unpacked". Needed for branded Google Chrome >= 137, which
+  ignores `--load-extension`.
+
+The manifest carries a fixed `key`, so the extension id is stable and both
+modes can open `chrome-extension://<id>/probe.html`.
+
+## Testing policy
+
+- Static tests run on every change (no browser).
+- Live tests assert: set of granted permissions == expected `available`
+  set; every available permission's probe passes; every unavailable one is
+  not granted and its namespace is absent; content script present in the
+  top frame and in an iframe of a test page.
+- Probes never do destructive or prompting calls (no clipboard writes, no
+  geolocation prompts, no downloads, no keep-awake).
+
+## Out of scope
+
+Manifest capabilities that are not permissions (devtools_page, side_panel,
+omnibox, tts_engine, chrome_url_overrides, commands, externally_connectable).
+Optional permissions (everything is required).

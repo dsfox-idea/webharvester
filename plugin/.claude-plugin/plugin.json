@@ -1,0 +1,11 @@
+{
+  "name": "chromium-extension-apis",
+  "description": "One short guide per Chromium extension permission that actually works on this machine: the official API interface plus what each permission can be used for in the broadest sense. Generated from Chromium sources and live measurement by the webharvester project.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Dmitry Golubnichiy",
+    "email": "dsfox@yandex.ru"
+  },
+  "keywords": ["chromium", "chrome-extension", "permissions", "browser", "reference"],
+  "license": "UNLICENSED"
+}

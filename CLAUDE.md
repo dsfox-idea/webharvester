@@ -26,6 +26,11 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   (`permissions_parser.cc`, `simple_feature.cc`, `background_info.cc`,
   `extension_info_generator.cc`, `channel_info_mac.mm`).
 
+- The `plugin/` skill is generated: `npm run build-guides` reads Chromium API
+  schemas at the catalog revision and merges them with hand-written use notes
+  in `src/permission-uses.ts`. Interface text is never hand-edited; use notes
+  and `src/api-schema-map.ts` are. Validate with `claude plugin validate plugin`.
+
 ## Lessons
 
 - Do not infer the release channel from Info.plist: Brave-based browsers map

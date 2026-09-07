@@ -21,6 +21,7 @@ out of the shipped manifest, so the loaded extension has no warnings.
 | `tests/static/` | No browser: catalog rules, manifest/catalog sync, availability rules, extension id. |
 | `tests/live/` | Loads the extension into a browser and checks granted permissions, API calls, content script. |
 | `docs/superpowers/specs/` | Design spec. |
+| `plugin/` | Claude Code plugin: one guide per working permission (interface + broad-use note), built by `npm run build-guides`. |
 
 ## Commands
 
@@ -34,6 +35,7 @@ npm run mark-non-working # test-results/probe-report.json -> catalog/non-working
 npm run sync-catalog     # refresh catalog/permissions.json from Chromium main
 npm run sync-catalog -- --version 151.0.7445.82   # catalog for one Chromium release
 npm run build-manifest   # regenerate extension/manifest.json
+npm run build-guides     # regenerate the Claude Code plugin from Chromium schemas + use notes
 ```
 
 The live run writes `test-results/probe-report.json` and attaches the

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "webharvester",
+  "description": "Chromium extension permission reference generated from Chromium sources and live browser measurement.",
+  "owner": {
+    "name": "Dmitry Golubnichiy",
+    "email": "dsfox@yandex.ru"
+  },
+  "plugins": [
+    {
+      "name": "chromium-extension-apis",
+      "source": "./plugin",
+      "description": "One short guide per Chromium extension permission that actually works on this machine: official API interface plus broad-sense use notes.",
+      "version": "0.1.0",
+      "category": "reference",
+      "author": { "name": "Dmitry Golubnichiy", "email": "dsfox@yandex.ru" }
+    }
+  ]
+}

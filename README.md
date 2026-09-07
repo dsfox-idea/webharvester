@@ -23,6 +23,43 @@ out of the shipped manifest, so the loaded extension has no warnings.
 | `docs/superpowers/specs/` | Design spec. |
 | `plugin/` | Claude Code plugin: one guide per working permission (interface + broad-use note), built by `npm run build-guides`. |
 
+## Install
+
+The plugin is static reference text; it needs no browser.
+
+New user, no clone (macOS/Linux):
+
+```sh
+claude plugin marketplace add dsfox-idea/webharvester
+claude plugin install chromium-extension-apis@webharvester
+```
+
+Or run the setup script from a clone:
+
+```sh
+git clone https://github.com/dsfox-idea/webharvester
+cd webharvester
+./setup.sh            # install the plugin
+./setup.sh --measure  # also install Growser, add a launcher, regenerate guides
+```
+
+Windows (PowerShell):
+
+```powershell
+git clone https://github.com/dsfox-idea/webharvester
+cd webharvester
+./setup.ps1            # install the plugin
+./setup.ps1 -Measure   # also install Growser from the Store and regenerate guides
+```
+
+`--measure` / `-Measure` re-measures which permissions your own browser grants
+and rebuilds the guides. Growser is available for macOS Apple Silicon and via
+the Microsoft Store on Windows; Linux and Intel macs get the plugin only. It
+loads the extension through a launcher that starts Growser with
+`--load-extension`; an unpacked extension does not persist in a profile on its
+own, so use that launcher (or load `extension/` once by hand from
+chrome://extensions).
+
 ## Commands
 
 ```sh

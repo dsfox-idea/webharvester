@@ -39,6 +39,17 @@ Selection rule (implemented by `scripts/sync-catalog.ts`):
 Result: 93 declarable permission names, stored in `catalog/permissions.json`
 together with the raw availability alternatives and the Chromium revision.
 
+## Non-working permissions
+
+The shipped manifest is the full catalog minus `catalog/non-working.json`:
+the permissions a live run of the full manifest measured as not granted in
+the target browser (Growser on macOS today), each with the predicted reason.
+`scripts/mark-non-working.ts` derives the list from the enriched probe
+report the live tests write; `build-manifest --full` restores the full
+manifest for a new measurement. The builder copies the list into
+`extension/non-working.json` so the probe page can show those names greyed.
+With the trimmed manifest the live tests expect zero manifest warnings.
+
 ## Version skew
 
 The manifest is built from Chromium main, so it can name permissions an

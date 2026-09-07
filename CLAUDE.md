@@ -9,6 +9,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   Chromium sources by `npm run sync-catalog`; then `npm run build-manifest`.
   Never edit `extension/manifest.json` by hand (a static test compares it to
   the builder output).
+- `catalog/non-working.json` is measured, not predicted: full manifest
+  (`build-manifest -- --full`) -> live run in the target browser ->
+  `mark-non-working` -> `build-manifest`. The shipped manifest excludes it and
+  the live tests then expect zero manifest warnings.
 - `npm test` (static, no browser) must pass before `npm run test:live`.
 - Live expectations come from `catalog/versions/<chromium version>.json`
   (fetched from the release tag on first use, then committed); the manifest

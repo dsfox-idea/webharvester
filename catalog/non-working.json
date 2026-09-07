@@ -1,0 +1,165 @@
+{
+  "measuredIn": {
+    "versionLine": "26.905.1 Chromium: 153.0.8010.18 (официальная сборка) (arm64)",
+    "executablePath": "/Applications/Growser.app/Contents/MacOS/Growser",
+    "chromiumVersion": "153.0.8010.18",
+    "measuredAt": "2026-09-07T14:23:12.563Z"
+  },
+  "permissions": [
+    {
+      "name": "audio",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "certificateProvider",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "declarativeWebRequest",
+      "reason": "channel",
+      "detail": "beta"
+    },
+    {
+      "name": "dns",
+      "reason": "channel",
+      "detail": "dev"
+    },
+    {
+      "name": "documentScan",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.deviceAttributes",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.hardwarePlatform",
+      "reason": "location",
+      "detail": "policy"
+    },
+    {
+      "name": "enterprise.kioskInput",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.login",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.networkingAttributes",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.platformKeys",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "enterprise.webrtc",
+      "reason": "unknown-permission",
+      "detail": "not in Chromium 153.0.8010.18"
+    },
+    {
+      "name": "experimental",
+      "reason": "command-line-switch",
+      "detail": "experimental-extension-apis"
+    },
+    {
+      "name": "experimentalActor",
+      "reason": "command-line-switch",
+      "detail": "extension-actor-api"
+    },
+    {
+      "name": "experimentalAiData",
+      "reason": "command-line-switch",
+      "detail": "extension-ai-data-collection"
+    },
+    {
+      "name": "fileBrowserHandler",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "fileSystemProvider",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "input",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "login",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "loginScreenStorage",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "loginState",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "omnibox.directInput",
+      "reason": "channel",
+      "detail": "dev"
+    },
+    {
+      "name": "platformKeys",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "printing",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "printingMetrics",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "processes",
+      "reason": "channel",
+      "detail": "dev"
+    },
+    {
+      "name": "system.network",
+      "reason": "allowlist",
+      "detail": "3 allowlisted ids"
+    },
+    {
+      "name": "systemLog",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "vpnProvider",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "wallpaper",
+      "reason": "platform",
+      "detail": "chromeos"
+    },
+    {
+      "name": "webRequestBlocking",
+      "reason": "max-manifest-version",
+      "detail": "2"
+    }
+  ]
+}

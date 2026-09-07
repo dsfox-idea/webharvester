@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { PermissionCatalog } from './catalog.ts';
+import type { NonWorkingList } from './non-working.ts';
 
 export interface ContentScriptDeclaration {
   matches: string[];
@@ -25,19 +26,32 @@ export interface ExtensionManifest {
   content_scripts: ContentScriptDeclaration[];
 }
 
-/** Builds `extension/manifest.json` from the catalog so the manifest never drifts from it. */
+/**
+ * Builds `extension/manifest.json` from the catalog minus the measured
+ * non-working list, so the manifest never drifts from either. The
+ * non-working list is also copied next to the manifest for the probe page.
+ */
 export class ManifestBuilder {
   static readonly manifestPath = fileURLToPath(new URL('../extension/manifest.json', import.meta.url));
+  static readonly nonWorkingCopyPath = fileURLToPath(new URL('../extension/non-working.json', import.meta.url));
   static readonly publicKeyPath = fileURLToPath(new URL('../catalog/public-key.b64', import.meta.url));
 
   private readonly catalog: PermissionCatalog;
+  private readonly nonWorking: NonWorkingList;
   private readonly publicKey: string;
   private readonly version: string;
 
-  constructor(catalog: PermissionCatalog, publicKey: string, version: string) {
+  constructor(catalog: PermissionCatalog, nonWorking: NonWorkingList, publicKey: string, version: string) {
     this.catalog = catalog;
+    this.nonWorking = nonWorking;
     this.publicKey = publicKey;
     this.version = version;
+  }
+
+  /** Catalog names that are not marked non-working. */
+  get permissions(): string[] {
+    const excluded = new Set(this.nonWorking.names);
+    return this.catalog.names.filter((name) => !excluded.has(name)).sort();
   }
 
   static readPublicKey(path: string = ManifestBuilder.publicKeyPath): string {
@@ -57,7 +71,7 @@ export class ManifestBuilder {
         'Declares every permission a regular Chromium extension can declare, plus all hosts and all frames. Open the action to run the permission probes.',
       key: this.publicKey,
       minimum_chrome_version: '116',
-      permissions: [...this.catalog.names].sort(),
+      permissions: this.permissions,
       host_permissions: ['<all_urls>'],
       background: { service_worker: 'background.js', type: 'module' },
       action: { default_title: 'webharvester: run permission probes' },
@@ -80,5 +94,6 @@ export class ManifestBuilder {
 
   write(path: string = ManifestBuilder.manifestPath): void {
     writeFileSync(path, this.serialize());
+    writeFileSync(ManifestBuilder.nonWorkingCopyPath, this.nonWorking.serialize());
   }
 }

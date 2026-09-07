@@ -3,20 +3,32 @@ import { expect, test } from '@playwright/test';
 import { PermissionCatalog } from '../../src/catalog.ts';
 import { ManifestBuilder } from '../../src/manifest-builder.ts';
 import { ExtensionIdentity } from '../../src/extension-id.ts';
+import { NonWorkingList } from '../../src/non-working.ts';
 
 test.describe('extension/manifest.json', () => {
   const catalog = PermissionCatalog.load();
   const manifest = ManifestBuilder.readManifest();
   const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')) as { version: string };
 
-  test('is exactly what the builder produces from the catalog', () => {
-    const builder = new ManifestBuilder(catalog, ManifestBuilder.readPublicKey(), pkg.version);
+  const nonWorking = NonWorkingList.load();
+
+  test('is exactly what the builder produces from the catalog minus the non-working list', () => {
+    const builder = new ManifestBuilder(catalog, nonWorking, ManifestBuilder.readPublicKey(), pkg.version);
     expect(readFileSync(ManifestBuilder.manifestPath, 'utf8')).toBe(builder.serialize());
+    expect(readFileSync(ManifestBuilder.nonWorkingCopyPath, 'utf8')).toBe(nonWorking.serialize());
   });
 
-  test('declares every catalog permission, sorted and without duplicates', () => {
-    expect(manifest.permissions).toEqual([...catalog.names].sort());
+  test('declares every catalog permission not marked non-working, sorted and without duplicates', () => {
+    const excluded = new Set(nonWorking.names);
+    expect(manifest.permissions).toEqual(catalog.names.filter((name) => !excluded.has(name)).sort());
     expect(new Set(manifest.permissions).size).toBe(manifest.permissions.length);
+  });
+
+  test('non-working names all come from the catalog and carry a reason', () => {
+    for (const p of nonWorking.permissions) {
+      expect(catalog.has(p.name), p.name).toBe(true);
+      expect(p.reason).not.toBe('');
+    }
   });
 
   test('declares full host access', () => {

@@ -7,6 +7,7 @@
   "scripts": {
     "sync-catalog": "node scripts/sync-catalog.ts",
     "build-manifest": "node scripts/build-manifest.ts",
+    "mark-non-working": "node scripts/mark-non-working.ts",
     "test": "playwright test --project=static",
     "test:live": "playwright test --project=live",
     "test:all": "playwright test"

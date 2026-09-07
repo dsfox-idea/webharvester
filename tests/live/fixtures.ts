@@ -6,6 +6,7 @@ import { CatalogRepository } from '../../src/catalog-repository.ts';
 import type { PermissionCatalog } from '../../src/catalog.ts';
 import { ExpectedPermissions } from '../../src/expected-permissions.ts';
 import { ManifestBuilder } from '../../src/manifest-builder.ts';
+import type { MeasuredReport } from '../../src/non-working.ts';
 import type { ProbeReport } from '../../src/probe-report.ts';
 
 interface WorkerFixtures {
@@ -26,15 +27,12 @@ export const test = base.extend<Record<never, never>, WorkerFixtures>({
   ],
   report: [
     async ({ session }, use) => {
-      const report = await session.runProbes();
-      mkdirSync('test-results', { recursive: true });
-      writeFileSync('test-results/probe-report.json', `${JSON.stringify(report, null, 2)}\n`);
-      await use(report);
+      await use(await session.runProbes());
     },
     { scope: 'worker' },
   ],
   expected: [
-    async ({ session }, use) => {
+    async ({ session, report }, use) => {
       const version = session.browser.version;
       let catalog: PermissionCatalog;
       try {
@@ -44,7 +42,15 @@ export const test = base.extend<Record<never, never>, WorkerFixtures>({
         catalog = CatalogRepository.readMain();
       }
       const declared = ManifestBuilder.readManifest().permissions;
-      await use(new ExpectedPermissions(new AvailabilityRules(session.environment), declared, catalog, version));
+      const expected = new ExpectedPermissions(new AvailabilityRules(session.environment), declared, catalog, version);
+      const measured: MeasuredReport = {
+        ...report,
+        browser: { versionLine: session.browser.versionLine, executablePath: session.browser.executablePath, version },
+        expectations: expected.expectations,
+      };
+      mkdirSync('test-results', { recursive: true });
+      writeFileSync('test-results/probe-report.json', `${JSON.stringify(measured, null, 2)}\n`);
+      await use(expected);
     },
     { scope: 'worker' },
   ],

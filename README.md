@@ -3,7 +3,9 @@
 A Manifest V3 Chromium extension that declares every permission a regular
 extension can declare (93 names, derived from Chromium sources), full host
 access (`<all_urls>`), and a content script on every URL and every frame.
-A test suite proves which permissions the browser actually grants.
+A test suite measures which permissions the browser actually grants; the
+ones it refuses are marked non-working (`catalog/non-working.json`) and left
+out of the shipped manifest, so the loaded extension has no warnings.
 
 ## Layout
 
@@ -11,6 +13,7 @@ A test suite proves which permissions the browser actually grants.
 | --- | --- |
 | `extension/` | The unpacked extension. `probe.html` runs one probe per permission and shows a table. |
 | `catalog/permissions.json` | Generated from Chromium main `_permission_features.json`; the manifest is built from it. |
+| `catalog/non-working.json` | Permissions the target browser refused in a live run of the full manifest; excluded from the manifest and shown greyed on the probe page. |
 | `catalog/versions/<version>.json` | Same catalog at the Chromium release tag of a browser the live tests ran against (fetched on first use). |
 | `scripts/sync-catalog.ts` | Refreshes the catalog from Chromium main (or a given revision). |
 | `scripts/build-manifest.ts` | Regenerates `extension/manifest.json` from the catalog. |
@@ -26,6 +29,8 @@ npm install
 npm test                 # static tests
 npm run test:live        # live tests in Playwright's bundled Chrome for Testing (headless)
 HEADED=1 npm run test:live
+npm run build-manifest -- --full   # manifest with all 93 names, for measuring a browser
+npm run mark-non-working # test-results/probe-report.json -> catalog/non-working.json
 npm run sync-catalog     # refresh catalog/permissions.json from Chromium main
 npm run sync-catalog -- --version 151.0.7445.82   # catalog for one Chromium release
 npm run build-manifest   # regenerate extension/manifest.json
@@ -37,6 +42,16 @@ warnings test. After loading, the session switches on developer mode and the
 per-extension "Allow User Scripts" toggle through `chrome.developerPrivate`
 on chrome://extensions, because that is what unlocks `chrome.debugger`,
 `chrome.userScripts` and Chromium's manifest warnings.
+
+## Re-measuring for another browser
+
+```sh
+npm run build-manifest -- --full
+CHROME_PATH=/Applications/Growser.app/Contents/MacOS/Growser HEADED=1 npm run test:live
+npm run mark-non-working
+npm run build-manifest
+CHROME_PATH=/Applications/Growser.app/Contents/MacOS/Growser HEADED=1 npm run test:live   # expects zero warnings now
+```
 
 ## Live tests against your own browser or profile
 

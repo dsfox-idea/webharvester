@@ -1,5 +1,6 @@
 import { CatalogRepository } from '../../src/catalog-repository.ts';
 import { ExtensionsPage } from '../../src/extensions-page.ts';
+import { NonWorkingList } from '../../src/non-working.ts';
 import { expect, test } from './fixtures.ts';
 
 test.describe('live permissions', () => {
@@ -9,8 +10,9 @@ test.describe('live permissions', () => {
     expect(report.manifestVersion).toBe(3);
   });
 
-  test('declares every catalog permission in the running manifest', async ({ report }) => {
-    expect([...report.declared].sort()).toEqual([...CatalogRepository.readMain().names].sort());
+  test('declares every catalog permission that is not marked non-working', async ({ report }) => {
+    const nonWorking = new Set(NonWorkingList.load().names);
+    expect([...report.declared].sort()).toEqual(CatalogRepository.readMain().names.filter((name) => !nonWorking.has(name)).sort());
   });
 
   test('grants exactly the permissions Chromium makes available in this environment', async ({ report, expected }) => {

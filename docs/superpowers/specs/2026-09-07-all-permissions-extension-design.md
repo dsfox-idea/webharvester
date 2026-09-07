@@ -49,6 +49,19 @@ from the catalog at that release tag (`catalog/versions/<version>.json`,
 fetched from `refs/tags/<version>` on first use); names missing there are
 expected unavailable with reason `unknown-permission`.
 
+## Release channel
+
+Feature availability compares the browser's `version_info::Channel`
+(UNKNOWN < CANARY < DEV < BETA < STABLE) with the feature's channel.
+Chromium and Chrome for Testing report UNKNOWN (no Keystone id,
+`channel_info_mac.mm`); Brave-based browsers report UNKNOWN for every
+non-official build (`brave/chromium_src/chrome/common/channel_info_mac.mm`).
+Branding files cannot tell an official build from a developer one, so the
+tests measure the channel: `system.storage.getAvailableCapacity` is gated at
+`dev` and needs no extra permission, so its presence means "dev or less
+stable" and its absence "beta or stable". A static test proves the catalog
+never distinguishes channels within either bucket.
+
 ## Runtime behaviour of unavailable permissions (verified in source)
 
 `extensions/common/manifest_handlers/permissions_parser.cc`, `ParseHelper`:

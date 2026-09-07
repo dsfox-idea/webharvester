@@ -35,8 +35,9 @@ export class VersionPage {
     }
   }
 
+  /** Brave-based browsers print their own version first and the base as "Chromium: 151.0.7445.82"; prefer that. */
   static parseVersion(versionLine: string): string {
-    const match = /(\d+\.\d+\.\d+\.\d+)/.exec(versionLine);
+    const match = /Chromium:\s*(\d+\.\d+\.\d+\.\d+)/.exec(versionLine) ?? /(\d+\.\d+\.\d+\.\d+)/.exec(versionLine);
     if (!match) throw new Error(`No Chromium version in "${versionLine}"`);
     return match[1];
   }

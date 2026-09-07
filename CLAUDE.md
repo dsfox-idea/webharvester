@@ -24,6 +24,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 
 ## Lessons
 
+- Do not infer the release channel from Info.plist: Brave-based browsers map
+  it their own way and any non-official build is Channel::UNKNOWN. The channel
+  is measured in the browser (`src/channel-probe.ts`).
+
 - Chrome API methods on `ChromeSetting`, `ContentSetting`, `StorageArea` must
   be called on their owner object; detached calls throw "Illegal invocation".
   `extension/probes/chrome-call.js` takes `(owner, method, ...args)`.

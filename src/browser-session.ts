@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { AvailabilityRules, type Channel, type Environment } from './availability.ts';
-import { ChannelDetector } from './channel-detector.ts';
+import { ChannelProbe } from './channel-probe.ts';
 import { ExtensionIdentity } from './extension-id.ts';
 import { ExtensionsPage } from './extensions-page.ts';
 import { VersionPage, type BrowserFacts } from './version-page.ts';
@@ -19,7 +19,7 @@ export interface SessionOptions {
   /** DevTools endpoint of a running browser that already has the extension loaded. Selects attach mode. */
   cdpUrl?: string;
   headless: boolean;
-  /** Overrides channel detection (needed in attach mode and on non-mac hosts with a custom binary). */
+  /** Overrides the measured channel (see ChannelProbe). */
   channel?: Channel;
 }
 
@@ -86,7 +86,7 @@ export class BrowserSession {
     if (this.mode === 'attach') await this.attach();
     else await this.launch();
     this.facts = await VersionPage.read(this.context);
-    this.env = this.detectEnvironment(this.facts);
+    this.env = await this.detectEnvironment(this.facts);
     await this.enableDeveloperTools();
   }
 
@@ -183,13 +183,8 @@ export class BrowserSession {
     throw new Error(`Service worker ${url} did not start within ${timeoutMs}ms`);
   }
 
-  private detectEnvironment(facts: BrowserFacts): Environment {
-    let channel = this.options.channel;
-    if (!channel && facts.executablePath) channel = new ChannelDetector().detect(facts.executablePath);
-    if (!channel) {
-      channel = 'stable';
-      console.warn('[session] channel unknown; assuming stable. Set CHANNEL=unknown|canary|dev|beta|stable to override.');
-    }
+  private async detectEnvironment(facts: BrowserFacts): Promise<Environment> {
+    const channel = this.options.channel ?? (await ChannelProbe.detect(this.context, this.extensionId));
     const env = AvailabilityRules.chromeForTesting({ channel, commandLineSwitches: VersionPage.parseSwitches(facts.commandLine) });
     console.log(`[session] browser ${facts.versionLine} at ${facts.executablePath}`);
     console.log(`[session] environment ${JSON.stringify(env)}`);

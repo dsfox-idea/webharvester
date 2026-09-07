@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { AvailabilityRules, type Environment } from '../../src/availability.ts';
-import type { CatalogEntry } from '../../src/catalog.ts';
+import { AvailabilityRules, type Channel, type Environment, type Platform } from '../../src/availability.ts';
+import { PermissionCatalog, type CatalogEntry } from '../../src/catalog.ts';
 
 const base: Environment = {
   platform: 'mac',
@@ -84,6 +84,21 @@ test.describe('AvailabilityRules', () => {
     expect(rules().evaluate(mixed)).toMatchObject({ reason: 'platform' });
     expect(rules({ platform: 'chromeos' }).evaluate(mixed)).toMatchObject({ reason: 'channel' });
     expect(rules({ platform: 'chromeos', channel: 'dev' }).evaluate(mixed)).toMatchObject({ reason: 'command-line-switch' });
+  });
+
+  test('two channel buckets suffice for the catalog: unknown/canary/dev agree, beta/stable agree', () => {
+    // ChannelProbe can only tell "dev or less stable" from "beta or stable"; this proves no catalog
+    // permission would be predicted differently within either bucket, on any desktop platform.
+    const catalog = PermissionCatalog.load();
+    const buckets: Channel[][] = [['unknown', 'canary', 'dev'], ['beta', 'stable']];
+    for (const platform of ['mac', 'win', 'linux'] as Platform[]) {
+      for (const bucket of buckets) {
+        for (const entry of catalog.entries) {
+          const verdicts = bucket.map((channel) => rules({ platform, channel }).evaluate(entry).available);
+          expect(new Set(verdicts).size, `${entry.name} on ${platform} across ${bucket.join('/')}`).toBe(1);
+        }
+      }
+    }
   });
 
   test('chromeForTesting environment reports the unknown channel on the host platform', () => {

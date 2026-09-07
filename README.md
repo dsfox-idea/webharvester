@@ -74,7 +74,7 @@ Environment variables:
 | `CHROME_PATH` | Browser binary. Default: Playwright's bundled Chrome for Testing. |
 | `USER_DATA_DIR` | Profile directory. Default: a fresh one under `.playwright-profile/`. |
 | `CDP_URL` | DevTools endpoint of a running browser; switches to attach mode. |
-| `CHANNEL` | `unknown`, `canary`, `dev`, `beta`, `stable`. On macOS the channel is read from the app bundle's `Info.plist` in launch mode; attach mode assumes `stable` unless set. |
+| `CHANNEL` | Overrides the measured channel (`unknown`, `canary`, `dev`, `beta`, `stable`). By default the channel is measured: the dev-channel-only API `system.storage.getAvailableCapacity` is present on dev/canary/unknown builds (Chromium, Chrome for Testing, developer builds of Brave-based browsers) and absent on beta/stable. |
 | `HEADED` | `1` to show the browser window. |
 
 ## What the tests assert

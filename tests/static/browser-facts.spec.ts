@@ -9,6 +9,7 @@ test.describe('VersionPage', () => {
   test('parses the Chromium version out of the chrome://version line', () => {
     expect(VersionPage.parseVersion('153.0.8010.12 (официальная сборка) (arm64)')).toBe('153.0.8010.12');
     expect(VersionPage.parseVersion('151.0.7445.82 (Official Build) unknown (arm64)')).toBe('151.0.7445.82');
+    expect(VersionPage.parseVersion('151.1.95.0 Chromium: 151.0.7445.82 (Official Build) (arm64)')).toBe('151.0.7445.82');
     expect(() => VersionPage.parseVersion('no version here')).toThrow(/No Chromium version/);
   });
 

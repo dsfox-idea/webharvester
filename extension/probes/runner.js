@@ -5,7 +5,7 @@ import { chromeCall } from './chrome-call.js';
 export class ProbeRunner {
   async run() {
     const manifest = chrome.runtime.getManifest();
-    const granted = await chromeCall(chrome.permissions.getAll);
+    const granted = await chromeCall(chrome.permissions, 'getAll');
     const grantedSet = new Set(granted.permissions ?? []);
     const probes = ProbeRegistry.forPermissions(manifest.permissions ?? []);
 

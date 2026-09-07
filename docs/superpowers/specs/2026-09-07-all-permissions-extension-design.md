@@ -28,8 +28,15 @@ Selection rule (implemented by `scripts/sync-catalog.ts`):
    (Google-internal ids; can never be granted to us).
 5. Drop feature-only names that are not API permissions (`plugin`, `runtime`):
    verified against the two `*_api_permissions.cc` tables.
+6. Drop `APIPermissionInfo::kFlagInternal` names (`devtools`, ...): the
+   manifest parser rejects them (`kDisallowInternalPermissions`); `devtools`
+   is granted only through the `devtools_page` key.
+7. Drop permissions that make Chromium refuse the manifest outright:
+   `transientBackground` needs an MV2 event page (`background_info.cc`,
+   `kTransientBackgroundConflictsWithPersistentBackground`); with an MV3
+   service worker the extension does not load at all.
 
-Result: 95 declarable permission names, stored in `catalog/permissions.json`
+Result: 93 declarable permission names, stored in `catalog/permissions.json`
 together with the raw availability alternatives and the Chromium revision.
 
 ## Runtime behaviour of unavailable permissions (verified in source)

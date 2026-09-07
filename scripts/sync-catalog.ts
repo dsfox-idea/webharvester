@@ -61,7 +61,7 @@ async function main(): Promise<void> {
 
   console.log(`wrote ${PermissionCatalog.defaultPath}`);
   console.log(`permissions: ${built.permissions.length}`);
-  console.log(`excluded private: ${built.excluded.private.length}, allowlist-only: ${built.excluded.allowlistOnly.length}, not API permissions: ${built.excluded.notApiPermissions.join(', ')}`);
+  console.log(`excluded private: ${built.excluded.private.length}, allowlist-only: ${built.excluded.allowlistOnly.length}, not API permissions: ${built.excluded.notApiPermissions.join(', ')}, internal: ${built.excluded.internal.join(', ')}, incompatible: ${built.excluded.incompatible.map((e) => e.name).join(', ')}`);
 }
 
 await main();

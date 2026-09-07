@@ -33,10 +33,19 @@ export interface CatalogSource {
   files: string[];
 }
 
+export interface IncompatiblePermission {
+  name: string;
+  reason: string;
+}
+
 export interface CatalogExclusions {
   private: string[];
   allowlistOnly: string[];
   notApiPermissions: string[];
+  /** APIPermissionInfo::kFlagInternal: rejected by the manifest parser, granted only through other manifest keys. */
+  internal: string[];
+  /** Declarable in principle, but Chromium refuses to load this extension's manifest with them. */
+  incompatible: IncompatiblePermission[];
 }
 
 export interface CatalogDocument {

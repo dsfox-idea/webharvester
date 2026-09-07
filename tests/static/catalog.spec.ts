@@ -17,6 +17,8 @@ test.describe('CatalogBuilder', () => {
       { channel: 'dev', extension_types: ['extension'] },
     ],
     plugin: { channel: 'stable', extension_types: ['extension'] },
+    transientBackground: { channel: 'dev', extension_types: ['extension'] },
+    devtools: { channel: 'stable', extension_types: ['extension'] },
     mixedTypes: [
       { channel: 'stable', extension_types: ['platform_app'] },
       { channel: 'stable', extension_types: ['extension'], platforms: ['chromeos'] },
@@ -30,6 +32,8 @@ test.describe('CatalogBuilder', () => {
       private: ['nested.somethingPrivate.event', 'secretPrivate'],
       allowlistOnly: ['allowlisted'],
       notApiPermissions: ['plugin'],
+      internal: ['devtools'],
+      incompatible: [{ name: 'transientBackground', reason: expect.stringContaining('MV3 service worker') }],
     });
   });
 
@@ -59,7 +63,13 @@ test.describe('catalog/permissions.json', () => {
   test('is sorted, unique, and free of excluded names', () => {
     const names = catalog.names;
     expect(names).toEqual([...new Set(names)].sort());
-    const excluded = new Set([...catalog.excluded.private, ...catalog.excluded.allowlistOnly, ...catalog.excluded.notApiPermissions]);
+    const excluded = new Set([
+      ...catalog.excluded.private,
+      ...catalog.excluded.allowlistOnly,
+      ...catalog.excluded.notApiPermissions,
+      ...catalog.excluded.internal,
+      ...catalog.excluded.incompatible.map((entry) => entry.name),
+    ]);
     expect(names.filter((name) => excluded.has(name))).toEqual([]);
     expect(names.filter((name) => /Private/.test(name))).toEqual([]);
   });

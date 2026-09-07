@@ -1,8 +1,14 @@
 /**
- * Calls a chrome.* API method uniformly whether it reports through a callback,
- * a promise, or both, and turns chrome.runtime.lastError into a rejection.
+ * Calls `owner[method](...args)` uniformly whether the API reports through a
+ * callback, a promise, or both, and turns chrome.runtime.lastError into a
+ * rejection. The method is invoked on its owner because ChromeSetting,
+ * ContentSetting and StorageArea methods throw "Illegal invocation" when
+ * detached.
  */
-export function chromeCall(fn, ...args) {
+export function chromeCall(owner, method, ...args) {
+  if (typeof owner?.[method] !== 'function') {
+    return Promise.reject(new Error(`${method} is not a function on ${owner === undefined ? 'undefined' : 'the API object'}`));
+  }
   return new Promise((resolve, reject) => {
     let settled = false;
     const settle = (error, value) => {
@@ -16,7 +22,7 @@ export function chromeCall(fn, ...args) {
     };
     let returned;
     try {
-      returned = fn(...args, callback);
+      returned = owner[method](...args, callback);
     } catch (error) {
       settle(error);
       return;

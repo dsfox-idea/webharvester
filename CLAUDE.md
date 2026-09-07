@@ -10,6 +10,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   Never edit `extension/manifest.json` by hand (a static test compares it to
   the builder output).
 - `npm test` (static, no browser) must pass before `npm run test:live`.
+- Live expectations come from `catalog/versions/<chromium version>.json`
+  (fetched from the release tag on first use, then committed); the manifest
+  itself comes from main, so older browsers warn "Permission 'x' is unknown"
+  for newer names and the tests expect exactly that.
 - Live tests load the extension through CDP `Extensions.loadUnpacked`
   (`--enable-unsafe-extension-debugging`); `--load-extension` is dead in
   branded Chrome 137+. Playwright's default `--disable-extensions` must be

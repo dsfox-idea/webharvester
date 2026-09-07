@@ -1,0 +1,1518 @@
+{
+  "source": {
+    "repository": "https://chromium.googlesource.com/chromium/src",
+    "revision": "refs/tags/153.0.8010.12",
+    "fetchedAt": "2026-09-07T14:07:28.813Z",
+    "files": [
+      "extensions/common/api/_permission_features.json",
+      "chrome/common/extensions/api/_permission_features.json"
+    ]
+  },
+  "excluded": {
+    "private": [
+      "accessibilityPrivate",
+      "accessibilityServicePrivate",
+      "activityLogPrivate",
+      "autofillPrivate",
+      "autotestPrivate",
+      "bluetoothPrivate",
+      "brailleDisplayPrivate",
+      "chromePrivate",
+      "chromeosInfoPrivate",
+      "commandLinePrivate",
+      "contextualTasksPrivate",
+      "crashReportPrivate",
+      "dictationPrivate",
+      "echoPrivate",
+      "enterprise.platformKeysPrivate",
+      "enterprise.reportingPrivate",
+      "enterprise.reportingPrivate.onDataMaskingRulesTriggered",
+      "feedbackPrivate",
+      "fileManagerPrivate",
+      "glicPrivate",
+      "glicPrivate.invoke",
+      "imageLoaderPrivate",
+      "imageWriterPrivate",
+      "indigoPrivate",
+      "inputMethodPrivate",
+      "languageSettingsPrivate",
+      "lockWindowFullscreenPrivate",
+      "mediaPlayerPrivate",
+      "metricsPrivate",
+      "networkingPrivate",
+      "odfsConfigPrivate",
+      "passwordsPrivate",
+      "pdfViewerPrivate",
+      "proxyOverrideRulesPrivate",
+      "resourcesPrivate",
+      "safeBrowsingPrivate",
+      "settingsPrivate",
+      "smartCardProviderPrivate",
+      "speechRecognitionPrivate",
+      "systemPrivate",
+      "terminalPrivate",
+      "usersPrivate",
+      "virtualKeyboardPrivate",
+      "webcamPrivate",
+      "webrtcDesktopCapturePrivate",
+      "webrtcLoggingPrivate",
+      "wmDesksPrivate"
+    ],
+    "allowlistOnly": [
+      "app.window.alpha",
+      "app.window.ime",
+      "audioCapture",
+      "commands.accessibility",
+      "externally_connectable.all_urls",
+      "fileSystem",
+      "fileSystem.write",
+      "hid",
+      "mdns",
+      "networking.onc",
+      "u2fDevices",
+      "usbDevices",
+      "videoCapture"
+    ],
+    "notApiPermissions": [
+      "plugin",
+      "runtime"
+    ],
+    "internal": [
+      "devtools"
+    ],
+    "incompatible": [
+      {
+        "name": "transientBackground",
+        "reason": "requires an MV2 event page; unloadable with an MV3 service worker"
+      }
+    ]
+  },
+  "permissions": [
+    {
+      "name": "accessibilityFeatures.modify",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "accessibilityFeatures.read",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "activeTab",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "alarms",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "audio",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ],
+          "session_types": [
+            "kiosk"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "75C7F4B720314B6CB1B5817CD86089DB95CD2461"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "background",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "platform_app",
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bookmarks",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "browsingData",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "certificateProvider",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "platforms": [
+            "chromeos"
+          ],
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clipboardRead",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clipboardWrite",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "contentSettings",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "contextMenus",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cookies",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "debugger",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "declarativeContent",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "declarativeNetRequest",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "declarativeNetRequestFeedback",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "declarativeNetRequestWithHostAccess",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "declarativeWebRequest",
+      "alternatives": [
+        {
+          "channel": "beta",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ],
+          "max_manifest_version": 2,
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "desktopCapture",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "dns",
+      "alternatives": [
+        {
+          "channel": "dev",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "allowlist": [
+            "7AE714FFD394E073F0294CFA134C9F91DB5FBAA4",
+            "C7DA3A55C2355F994D3FDDAD120B426A0DF63843",
+            "75E3CFFFC530582C583E4690EF97C70B9C8423B7"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "documentScan",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "downloads",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "downloads.open",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "downloads.shelf",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "downloads.ui",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "enterprise.deviceAttributes",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "enterprise.hardwarePlatform",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy"
+        }
+      ]
+    },
+    {
+      "name": "enterprise.kioskInput",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ],
+          "session_types": [
+            "kiosk"
+          ],
+          "feature_flag": "ApiEnterpriseKioskInput"
+        }
+      ]
+    },
+    {
+      "name": "enterprise.login",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "enterprise.networkingAttributes",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "enterprise.platformKeys",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "platforms": [
+            "chromeos"
+          ],
+          "extension_types": [
+            "extension",
+            "platform_app",
+            "legacy_packaged_app"
+          ],
+          "location": "policy"
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "external_component",
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "EC8EA268128FECE14CEC68B90686D87755D87083"
+          ]
+        },
+        {
+          "channel": "stable",
+          "platforms": [
+            "chromeos"
+          ],
+          "extension_types": [
+            "extension"
+          ],
+          "allowlist": [
+            "A4CC6F00ACF41015AF38F1D5C98E97C2B8B3B320",
+            "4E09F1C1EEC4D27F1F7DF18BA3643307107A7C41"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "experimental",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "command_line_switch": "experimental-extension-apis",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "experimentalActor",
+      "alternatives": [
+        {
+          "extension_types": [
+            "extension"
+          ],
+          "channel": "stable",
+          "command_line_switch": "extension-actor-api",
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "experimentalAiData",
+      "alternatives": [
+        {
+          "extension_types": [
+            "extension"
+          ],
+          "channel": "stable",
+          "command_line_switch": "extension-ai-data-collection",
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "favicon",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fileBrowserHandler",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fileSystemProvider",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fontSettings",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gcm",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geolocation",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "identity",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "identity.email",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "idle",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "login",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "dependencies": [
+            "behavior:imprivata_extension"
+          ],
+          "extension_types": [
+            "extension",
+            "login_screen_extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "login_screen_extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "93B7178E8C275515C38D4F43D9DF4648F0EA9B03",
+            "7FE4A999359A456C4B0FB7B7AD85CEA29CA50519",
+            "3F5995FE79A861F019C6F093BEF98D73FA9D3A5F",
+            "8ECFC754A70BE499325FA4BB705E62EFEEC1BC80",
+            "C03440D5E6161ED58738ABA11586B1DB4B4DCA8A",
+            "4B7E9789426EBD1BB3F99D72690DAE303FC042DF"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "loginScreenStorage",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "dependencies": [
+            "behavior:imprivata_extension"
+          ],
+          "extension_types": [
+            "extension",
+            "login_screen_extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        },
+        {
+          "channel": "canary",
+          "extension_types": [
+            "extension",
+            "login_screen_extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "7FE4A999359A456C4B0FB7B7AD85CEA29CA50519",
+            "3F5995FE79A861F019C6F093BEF98D73FA9D3A5F"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "login_screen_extension"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "93B7178E8C275515C38D4F43D9DF4648F0EA9B03",
+            "4B7E9789426EBD1BB3F99D72690DAE303FC042DF",
+            "36F5326E7683E204CE9CE1532093D8BB9CD5D280"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "loginState",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "management",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nativeMessaging",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "platforms": [
+            "desktop_android"
+          ],
+          "feature_flag": "ApiDesktopAndroidNativeMessaging"
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "offscreen",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3
+        }
+      ]
+    },
+    {
+      "name": "omnibox.directInput",
+      "alternatives": [
+        {
+          "channel": "dev",
+          "feature_flag": "ExperimentalOmniboxLabs",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pageCapture",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "platformKeys",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "power",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "printerProvider",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "printing",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "platforms": [
+            "chromeos"
+          ],
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "printingMetrics",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "platforms": [
+            "chromeos"
+          ],
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy"
+        }
+      ]
+    },
+    {
+      "name": "privacy",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "processes",
+      "alternatives": [
+        {
+          "channel": "dev",
+          "extension_types": [
+            "extension"
+          ]
+        },
+        {
+          "channel": "beta",
+          "extension_types": [
+            "extension"
+          ],
+          "allowlist": [
+            "7D7A4B147FE39908A5AF13F85E38989C54BBE41C",
+            "0EEDFC0EED87871237213F34EBC7B4982A195C95"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "allowlist": [
+            "DF84F03F9B960409CCDE0D895B9650EBE81C0A8E",
+            "80B9DC58E5210749F052F5B4DB239C50CF72AEB6",
+            "7D7A4B147FE39908A5AF13F85E38989C54BBE41C",
+            "0EEDFC0EED87871237213F34EBC7B4982A195C95"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "proxy",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "publicSuffix",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "readingList",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3
+        }
+      ]
+    },
+    {
+      "name": "scripting",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sidePanel",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3,
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "storage",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system.cpu",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system.display",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system.memory",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system.network",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "allowlist": [
+            "DD87C93131FF8D3DE4E483DC1EB298D73C7223A6",
+            "13E3107CEF097680EF38F4C405F0014ECC2428C6",
+            "F14B6BF9F5B9205222E568B3C838D9E99C3F5032"
+          ]
+        },
+        {
+          "channel": "dev",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "system.storage",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos",
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "systemLog",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "login_screen_extension",
+            "platform_app"
+          ],
+          "location": "policy",
+          "platforms": [
+            "chromeos"
+          ]
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "login_screen_extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ],
+          "allowlist": [
+            "EC3DE21E048B67319893889529354DFBFA96FD23",
+            "A19608AC34215B127FF9D7C006D67F5C8ED8146D",
+            "6B748A5C005F21B7CBCF4170C2F883E435DEB511",
+            "075FF17D52ED6E3C2E5EC4D99F188E7A25AF47EA",
+            "5C825E850034490380BCB756D43ABB2CF537AA91"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tabCapture",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tabGroups",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "topSites",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tts",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ttsEngine",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unlimitedStorage",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app",
+            "hosted_app",
+            "platform_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "userScripts",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3
+        }
+      ]
+    },
+    {
+      "name": "vpnProvider",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "platform_app"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wallpaper",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "platform_app",
+            "extension"
+          ],
+          "platforms": [
+            "chromeos"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webAuthenticationProxy",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "min_manifest_version": 3,
+          "platforms": [
+            "linux",
+            "mac",
+            "win"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webNavigation",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webRequest",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webRequestAuthProvider",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "webRequestBlocking",
+      "alternatives": [
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension",
+            "legacy_packaged_app"
+          ],
+          "max_manifest_version": 2
+        },
+        {
+          "channel": "stable",
+          "extension_types": [
+            "extension"
+          ],
+          "location": "policy",
+          "min_manifest_version": 3
+        }
+      ]
+    }
+  ]
+}

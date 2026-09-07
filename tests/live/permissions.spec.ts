@@ -1,3 +1,4 @@
+import { CatalogRepository } from '../../src/catalog-repository.ts';
 import { ExtensionsPage } from '../../src/extensions-page.ts';
 import { expect, test } from './fixtures.ts';
 
@@ -8,8 +9,8 @@ test.describe('live permissions', () => {
     expect(report.manifestVersion).toBe(3);
   });
 
-  test('declares every catalog permission in the running manifest', async ({ report, expected }) => {
-    expect([...report.declared].sort()).toEqual(expected.expectations.map((e) => e.name).sort());
+  test('declares every catalog permission in the running manifest', async ({ report }) => {
+    expect([...report.declared].sort()).toEqual([...CatalogRepository.readMain().names].sort());
   });
 
   test('grants exactly the permissions Chromium makes available in this environment', async ({ report, expected }) => {

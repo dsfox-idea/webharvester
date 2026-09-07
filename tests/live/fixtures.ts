@@ -1,31 +1,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { test as base } from '@playwright/test';
-import { AvailabilityRules, type Verdict } from '../../src/availability.ts';
+import { AvailabilityRules } from '../../src/availability.ts';
 import { BrowserSession } from '../../src/browser-session.ts';
-import { PermissionCatalog } from '../../src/catalog.ts';
+import { CatalogRepository } from '../../src/catalog-repository.ts';
+import type { PermissionCatalog } from '../../src/catalog.ts';
+import { ExpectedPermissions } from '../../src/expected-permissions.ts';
+import { ManifestBuilder } from '../../src/manifest-builder.ts';
 import type { ProbeReport } from '../../src/probe-report.ts';
-
-export interface Expectation {
-  name: string;
-  verdict: Verdict;
-}
-
-/** What Chromium should grant in the session's environment, per catalog permission. */
-export class ExpectedPermissions {
-  readonly expectations: Expectation[];
-
-  constructor(rules: AvailabilityRules, catalog: PermissionCatalog) {
-    this.expectations = catalog.entries.map((entry) => ({ name: entry.name, verdict: rules.evaluate(entry) }));
-  }
-
-  get available(): string[] {
-    return this.expectations.filter((e) => e.verdict.available).map((e) => e.name);
-  }
-
-  get unavailable(): Expectation[] {
-    return this.expectations.filter((e) => !e.verdict.available);
-  }
-}
 
 interface WorkerFixtures {
   session: BrowserSession;
@@ -54,7 +35,16 @@ export const test = base.extend<Record<never, never>, WorkerFixtures>({
   ],
   expected: [
     async ({ session }, use) => {
-      await use(new ExpectedPermissions(new AvailabilityRules(session.environment), PermissionCatalog.load()));
+      const version = session.browser.version;
+      let catalog: PermissionCatalog;
+      try {
+        catalog = await new CatalogRepository().forVersion(version);
+      } catch (error) {
+        console.warn(`[catalog] no catalog for Chromium ${version} (${(error as Error).message}); falling back to main`);
+        catalog = CatalogRepository.readMain();
+      }
+      const declared = ManifestBuilder.readManifest().permissions;
+      await use(new ExpectedPermissions(new AvailabilityRules(session.environment), declared, catalog, version));
     },
     { scope: 'worker' },
   ],

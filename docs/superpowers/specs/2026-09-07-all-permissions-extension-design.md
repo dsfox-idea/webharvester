@@ -39,6 +39,16 @@ Selection rule (implemented by `scripts/sync-catalog.ts`):
 Result: 93 declarable permission names, stored in `catalog/permissions.json`
 together with the raw availability alternatives and the Chromium revision.
 
+## Version skew
+
+The manifest is built from Chromium main, so it can name permissions an
+older browser does not know (e.g. `publicSuffix` on Chromium 151). Chromium
+then warns "Permission 'x' is unknown." and ignores it. The live tests read
+the browser's Chromium version from chrome://version and build expectations
+from the catalog at that release tag (`catalog/versions/<version>.json`,
+fetched from `refs/tags/<version>` on first use); names missing there are
+expected unavailable with reason `unknown-permission`.
+
 ## Runtime behaviour of unavailable permissions (verified in source)
 
 `extensions/common/manifest_handlers/permissions_parser.cc`, `ParseHelper`:
@@ -73,6 +83,10 @@ scripts/
   build-manifest.ts  catalog -> extension/manifest.json
 src/
   catalog.ts         PermissionCatalog (load/parse)
+  catalog-repository.ts  main catalog + per-Chromium-version catalogs
+  gitiles.ts         Chromium source fetcher
+  version-page.ts    chrome://version reader (version, executable, switches)
+  expected-permissions.ts  expectations for one browser
   availability.ts    AvailabilityRules: expected status per environment
   extension-id.ts    ExtensionIdentity: id from manifest.key
   browser-session.ts BrowserSession: launch (flags) or attach (CDP)

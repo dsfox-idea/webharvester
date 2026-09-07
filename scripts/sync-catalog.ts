@@ -1,67 +1,38 @@
 /**
- * Regenerates catalog/permissions.json from Chromium main.
- * Usage: node scripts/sync-catalog.ts [revision]
+ * Regenerates the permission catalog from Chromium.
+ *   node scripts/sync-catalog.ts                 -> catalog/permissions.json from main HEAD
+ *   node scripts/sync-catalog.ts <commit>        -> catalog/permissions.json from that commit
+ *   node scripts/sync-catalog.ts --version 151.0.7445.82 -> catalog/versions/151.0.7445.82.json
  */
 import { writeFileSync } from 'node:fs';
-import { ChromiumJson } from '../src/chromium-json.ts';
-import { CatalogBuilder } from '../src/catalog-builder.ts';
-import { PermissionCatalog, type CatalogDocument, type FeatureDocument } from '../src/catalog.ts';
-
-class GitilesRepository {
-  static readonly chromium = 'https://chromium.googlesource.com/chromium/src';
-
-  private readonly baseUrl: string;
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
-  }
-
-  async headRevision(branch = 'main'): Promise<string> {
-    const text = await this.fetchText(`${this.baseUrl}/+/refs/heads/${branch}?format=JSON`);
-    const json = JSON.parse(text.replace(/^\)\]\}'\n?/, '')) as { commit: string };
-    return json.commit;
-  }
-
-  async file(path: string, revision: string): Promise<string> {
-    const base64 = await this.fetchText(`${this.baseUrl}/+/${revision}/${path}?format=TEXT`);
-    return Buffer.from(base64, 'base64').toString('utf8');
-  }
-
-  private async fetchText(url: string): Promise<string> {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText} for ${url}`);
-    return response.text();
-  }
-}
-
-const featureFiles = [
-  'extensions/common/api/_permission_features.json',
-  'chrome/common/extensions/api/_permission_features.json',
-];
+import { CatalogRepository } from '../src/catalog-repository.ts';
+import { PermissionCatalog } from '../src/catalog.ts';
+import { GitilesRepository } from '../src/gitiles.ts';
 
 async function main(): Promise<void> {
-  const repository = new GitilesRepository(GitilesRepository.chromium);
-  const revision = process.argv[2] ?? (await repository.headRevision());
-  console.log(`Chromium revision ${revision}`);
+  const gitiles = new GitilesRepository();
+  const repository = new CatalogRepository(gitiles);
+  const [first, second] = process.argv.slice(2);
 
-  const documents: FeatureDocument[] = [];
-  for (const path of featureFiles) {
-    const text = await repository.file(path, revision);
-    documents.push(ChromiumJson.parse<FeatureDocument>(text));
-    console.log(`fetched ${path} (${text.length} bytes)`);
+  if (first === '--version') {
+    if (!second) throw new Error('--version needs a Chromium version like 151.0.7445.82');
+    const catalog = await repository.forVersion(second);
+    console.log(`permissions in Chromium ${second}: ${catalog.names.length}`);
+    return;
   }
 
-  const built = new CatalogBuilder(documents).build();
-  const document: CatalogDocument = {
-    source: { repository: GitilesRepository.chromium, revision, fetchedAt: new Date().toISOString(), files: featureFiles },
-    excluded: built.excluded,
-    permissions: built.permissions,
-  };
+  const revision = first ?? (await gitiles.headRevision());
+  console.log(`Chromium revision ${revision}`);
+  const document = await repository.build(revision);
   writeFileSync(PermissionCatalog.defaultPath, `${JSON.stringify(document, null, 2)}\n`);
-
   console.log(`wrote ${PermissionCatalog.defaultPath}`);
-  console.log(`permissions: ${built.permissions.length}`);
-  console.log(`excluded private: ${built.excluded.private.length}, allowlist-only: ${built.excluded.allowlistOnly.length}, not API permissions: ${built.excluded.notApiPermissions.join(', ')}, internal: ${built.excluded.internal.join(', ')}, incompatible: ${built.excluded.incompatible.map((e) => e.name).join(', ')}`);
+  console.log(`permissions: ${document.permissions.length}`);
+  const excluded = document.excluded;
+  console.log(
+    `excluded private: ${excluded.private.length}, allowlist-only: ${excluded.allowlistOnly.length}, ` +
+      `not API permissions: ${excluded.notApiPermissions.join(', ')}, internal: ${excluded.internal.join(', ')}, ` +
+      `incompatible: ${excluded.incompatible.map((e) => e.name).join(', ')}`,
+  );
 }
 
 await main();

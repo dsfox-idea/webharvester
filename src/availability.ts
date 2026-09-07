@@ -29,7 +29,9 @@ export type UnavailableReason =
   | 'location'
   | 'min-manifest-version'
   | 'max-manifest-version'
-  | 'dependency';
+  | 'dependency'
+  /** The browser's Chromium release predates the permission: "Permission 'x' is unknown." */
+  | 'unknown-permission';
 
 export interface Verdict {
   available: boolean;

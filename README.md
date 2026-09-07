@@ -10,7 +10,8 @@ A test suite proves which permissions the browser actually grants.
 | Path | Purpose |
 | --- | --- |
 | `extension/` | The unpacked extension. `probe.html` runs one probe per permission and shows a table. |
-| `catalog/permissions.json` | Generated from Chromium `_permission_features.json`; the only permission list in the repo. |
+| `catalog/permissions.json` | Generated from Chromium main `_permission_features.json`; the manifest is built from it. |
+| `catalog/versions/<version>.json` | Same catalog at the Chromium release tag of a browser the live tests ran against (fetched on first use). |
 | `scripts/sync-catalog.ts` | Refreshes the catalog from Chromium main (or a given revision). |
 | `scripts/build-manifest.ts` | Regenerates `extension/manifest.json` from the catalog. |
 | `src/` | Catalog model, availability rules (a port of `SimpleFeature` checks), browser session for tests. |
@@ -26,6 +27,7 @@ npm test                 # static tests
 npm run test:live        # live tests in Playwright's bundled Chrome for Testing (headless)
 HEADED=1 npm run test:live
 npm run sync-catalog     # refresh catalog/permissions.json from Chromium main
+npm run sync-catalog -- --version 151.0.7445.82   # catalog for one Chromium release
 npm run build-manifest   # regenerate extension/manifest.json
 ```
 
@@ -82,8 +84,11 @@ Environment variables:
 - Availability rules reproduce Chromium's `SimpleFeature` checks: platform,
   channel, command-line switch, feature flag, session type, allowlist,
   install location, manifest version bounds, behaviour dependencies.
-- Live: the set of granted permissions equals the set the rules predict for
-  the detected environment; every granted permission's API namespace exists;
+- Live: the browser's Chromium version, executable path and command line are
+  read from chrome://version; expectations use the catalog of that Chromium
+  release, so a permission newer than the browser is expected to be reported
+  as "Permission 'x' is unknown". The set of granted permissions equals the
+  set the rules predict for the detected environment; every granted permission's API namespace exists;
   every granted permission survives a harmless call; all predicted-unavailable
   permissions are absent and Chromium's own manifest warnings name exactly
   those permissions; `<all_urls>` is granted; the content script runs in the

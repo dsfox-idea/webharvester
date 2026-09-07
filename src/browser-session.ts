@@ -6,6 +6,7 @@ import { AvailabilityRules, type Channel, type Environment } from './availabilit
 import { ChannelDetector } from './channel-detector.ts';
 import { ExtensionIdentity } from './extension-id.ts';
 import { ExtensionsPage } from './extensions-page.ts';
+import { VersionPage, type BrowserFacts } from './version-page.ts';
 import { ManifestBuilder } from './manifest-builder.ts';
 import type { ProbeReport } from './probe-report.ts';
 
@@ -42,9 +43,10 @@ export class BrowserSession {
   readonly extensionId: string;
   /** True once chrome://extensions developer mode and the user-scripts toggle were switched on. */
   developerMode = false;
-  private browser?: Browser;
+  private connectedBrowser?: Browser;
   private browserContext?: BrowserContext;
   private env?: Environment;
+  private facts?: BrowserFacts;
   private temporaryProfile?: string;
 
   constructor(options: SessionOptions) {
@@ -74,9 +76,17 @@ export class BrowserSession {
     return this.env;
   }
 
+  /** chrome://version facts: Chromium version, executable, command line. */
+  get browser(): BrowserFacts {
+    if (!this.facts) throw new Error('BrowserSession is not open');
+    return this.facts;
+  }
+
   async open(): Promise<void> {
     if (this.mode === 'attach') await this.attach();
     else await this.launch();
+    this.facts = await VersionPage.read(this.context);
+    this.env = this.detectEnvironment(this.facts);
     await this.enableDeveloperTools();
   }
 
@@ -86,7 +96,7 @@ export class BrowserSession {
 
   async close(): Promise<void> {
     await this.browserContext?.close();
-    await this.browser?.close();
+    await this.connectedBrowser?.close();
     if (this.temporaryProfile) rmSync(this.temporaryProfile, { recursive: true, force: true });
   }
 
@@ -118,16 +128,14 @@ export class BrowserSession {
       // Playwright disables extensions by default; the loaded extension would exist but stay disabled.
       ignoreDefaultArgs: ['--disable-extensions'],
     });
-    this.env = this.detectEnvironment(executablePath);
     await this.loadUnpacked();
     await this.waitForServiceWorker();
   }
 
   private async attach(): Promise<void> {
     console.log(`[session] attach ${this.options.cdpUrl}`);
-    this.browser = await chromium.connectOverCDP(this.options.cdpUrl!);
-    this.browserContext = this.browser.contexts()[0] ?? (await this.browser.newContext());
-    this.env = this.detectEnvironment(undefined);
+    this.connectedBrowser = await chromium.connectOverCDP(this.options.cdpUrl!);
+    this.browserContext = this.connectedBrowser.contexts()[0] ?? (await this.connectedBrowser.newContext());
     try {
       await this.loadUnpacked();
     } catch (error) {
@@ -137,7 +145,7 @@ export class BrowserSession {
 
   /** Asks the browser to load the unpacked extension; Chromium answers with the id or the manifest error. */
   private async loadUnpacked(): Promise<void> {
-    const browser = this.browserContext?.browser() ?? this.browser;
+    const browser = this.browserContext?.browser() ?? this.connectedBrowser;
     if (!browser) throw new Error('No Browser object to open a CDP session on');
     const cdp = await browser.newBrowserCDPSession();
     try {
@@ -175,14 +183,15 @@ export class BrowserSession {
     throw new Error(`Service worker ${url} did not start within ${timeoutMs}ms`);
   }
 
-  private detectEnvironment(executablePath: string | undefined): Environment {
+  private detectEnvironment(facts: BrowserFacts): Environment {
     let channel = this.options.channel;
-    if (!channel && executablePath) channel = new ChannelDetector().detect(executablePath);
+    if (!channel && facts.executablePath) channel = new ChannelDetector().detect(facts.executablePath);
     if (!channel) {
       channel = 'stable';
       console.warn('[session] channel unknown; assuming stable. Set CHANNEL=unknown|canary|dev|beta|stable to override.');
     }
-    const env = AvailabilityRules.chromeForTesting({ channel });
+    const env = AvailabilityRules.chromeForTesting({ channel, commandLineSwitches: VersionPage.parseSwitches(facts.commandLine) });
+    console.log(`[session] browser ${facts.versionLine} at ${facts.executablePath}`);
     console.log(`[session] environment ${JSON.stringify(env)}`);
     return env;
   }

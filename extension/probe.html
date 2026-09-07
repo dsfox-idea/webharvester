@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>webharvester permission probes</title>
+  <style>
+    body { font: 13px/1.4 system-ui, sans-serif; margin: 16px; color: #222; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    #summary { margin: 8px 0 12px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 3px 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+    th { background: #f3f3f3; position: sticky; top: 0; }
+    td.detail { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; }
+    .yes { color: #1a7f37; } .no { color: #b42318; } .maybe { color: #9a6700; } .skip { color: #666; }
+    button { padding: 4px 10px; }
+  </style>
+</head>
+<body>
+  <h1>webharvester permission probes</h1>
+  <div><button id="run">Run again</button> <span id="status"></span></div>
+  <div id="summary"></div>
+  <table>
+    <thead><tr><th>#</th><th>permission</th><th>granted</th><th>namespace</th><th>exercise</th><th>detail</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script type="module" src="probe.js"></script>
+</body>
+</html>

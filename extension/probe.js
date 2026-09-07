@@ -1,0 +1,69 @@
+import { ProbeRunner } from './probes/runner.js';
+
+/** Renders a ProbeRunner report into the probe page and exposes it to tests. */
+class ProbePage {
+  constructor(runner) {
+    this.runner = runner;
+    this.lastReport = null;
+    this.rows = document.getElementById('rows');
+    this.summary = document.getElementById('summary');
+    this.status = document.getElementById('status');
+    document.getElementById('run').addEventListener('click', () => this.run());
+  }
+
+  async run() {
+    this.status.textContent = 'running...';
+    try {
+      const report = await this.runner.run();
+      this.lastReport = report;
+      this.render(report);
+      this.status.textContent = `done at ${report.ranAt}`;
+      console.log('[webharvester] probe report', report);
+      return report;
+    } catch (error) {
+      this.status.textContent = `failed: ${error.message}`;
+      console.error('[webharvester] probe run failed', error);
+      throw error;
+    }
+  }
+
+  render(report) {
+    const granted = report.results.filter((r) => r.granted).length;
+    const passed = report.results.filter((r) => r.exercise.status === 'passed').length;
+    const failed = report.results.filter((r) => r.exercise.status === 'failed').length;
+    this.summary.textContent =
+      `${report.extensionId}: ${report.declared.length} declared, ${granted} granted, ` +
+      `${report.grantedOrigins.length} origins, exercises passed ${passed}, failed ${failed}`;
+    this.rows.replaceChildren(...report.results.map((result, index) => this.row(result, index + 1)));
+  }
+
+  row(result, index) {
+    const tr = document.createElement('tr');
+    const cells = [
+      [String(index), ''],
+      [result.permission, ''],
+      [result.granted ? 'yes' : 'no', result.granted ? 'yes' : 'no'],
+      this.namespaceCell(result),
+      [result.exercise.status, { passed: 'yes', failed: 'no', skipped: 'skip' }[result.exercise.status]],
+      [result.exercise.detail, 'detail'],
+    ];
+    for (const [text, className] of cells) {
+      const td = document.createElement('td');
+      td.textContent = text;
+      if (className) td.className = className;
+      tr.append(td);
+    }
+    return tr;
+  }
+
+  namespaceCell(result) {
+    if (!result.namespace) return ['(capability)', 'skip'];
+    if (result.namespace.present) return [`${result.namespace.name} present`, 'yes'];
+    if (result.conditional) return [`${result.namespace.name} absent (needs ${result.conditional})`, 'maybe'];
+    return [`${result.namespace.name} absent`, 'no'];
+  }
+}
+
+const page = new ProbePage(new ProbeRunner());
+window.__webharvester = page;
+page.run();

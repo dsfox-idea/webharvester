@@ -1,0 +1,21 @@
+{
+  "name": "webharvester",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chromium MV3 extension declaring every declarable extension permission, with tests proving which ones are granted.",
+  "type": "module",
+  "scripts": {
+    "sync-catalog": "node scripts/sync-catalog.ts",
+    "build-manifest": "node scripts/build-manifest.ts",
+    "test": "playwright test --project=static",
+    "test:live": "playwright test --project=live",
+    "test:all": "playwright test"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/chrome": "^0.2.9",
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2"
+  }
+}

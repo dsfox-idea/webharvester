@@ -1,6 +1,13 @@
 # web-harvester (Claude Code plugin)
 
-A skill with one short reference per Chromium extension permission that a real
+Lets Claude Code explore and act on the live web through the user's own real,
+logged-in browser — screenshots, data between tabs, interactive actions on the
+user's behalf, timed checks — instead of a sandboxed fetch or headless session.
+The `web-discover` skill is the capability reference for the bundled
+all-permissions browser extension.
+
+
+One short reference per capability (Chromium extension permission) that a real
 browser on this machine actually grants. Each reference has the permission's
 official API interface (functions and events, taken from Chromium's own API
 schemas) and an authored note on what the permission is for in the broadest

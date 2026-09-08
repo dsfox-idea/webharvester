@@ -1,6 +1,6 @@
 {
   "name": "web-harvester",
-  "description": "One short guide per Chromium extension permission that actually works on this machine: the official API interface plus what each permission can be used for in the broadest sense. Works standalone with manual setup, or automatically with Growser (growser.org), the default browser of the webharvester tool, which bundles the measuring extension and enables it with --enable-webharvester.",
+  "description": "web-harvester lets Claude Code explore and act on the live web through the user's own real, logged-in browser (Growser) — with their cookies and sessions and none of the headless or bot-wall limits: screenshots, reading and moving data between tabs, clicking and filling forms on the user's behalf, opening and closing tabs, and checking pages on a timer. The bundled all-permissions extension provides the capabilities; the web-discover skill is the reference so Claude knows which one to reach for.",
   "version": "0.1.0",
   "author": {
     "name": "Dmitry Golubnichiy",
@@ -9,11 +9,12 @@
   "homepage": "https://webharvester.org",
   "repository": "https://github.com/dsfox-idea/webharvester",
   "keywords": [
-    "chromium",
-    "chrome-extension",
-    "permissions",
-    "browser",
-    "reference"
+    "browser-automation",
+    "web",
+    "claude-code",
+    "screenshots",
+    "chromium-extension",
+    "permissions"
   ],
   "license": "MIT"
 }

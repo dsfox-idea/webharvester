@@ -7,6 +7,19 @@ A test suite measures which permissions the browser actually grants; the
 ones it refuses are marked non-working (`catalog/non-working.json`) and left
 out of the shipped manifest, so the loaded extension has no warnings.
 
+## Two ways to use
+
+- **On its own (manual).** Load `extension/` into any Chromium browser
+  (chrome://extensions -> Developer mode -> Load unpacked, or launch with
+  `--load-extension=extension`) and install the skill/plugin separately. Works
+  anywhere, but you wire the pieces up yourself.
+- **With Growser (default, automatic).** [Growser](https://growser.org) ships
+  this extension bundled and turns it on with a single launch argument,
+  `--enable-webharvester`. Growser is the default browser of the webharvester
+  tool for Claude Code and is available for Windows, macOS and Linux, so this
+  is the out-of-the-box path: no unpacked-extension step, and it survives
+  restarts because the bundled extension is a normal installed one.
+
 ## Layout
 
 | Path | Purpose |
@@ -53,12 +66,11 @@ cd webharvester
 ```
 
 `--measure` / `-Measure` re-measures which permissions your own browser grants
-and rebuilds the guides. Growser is available for macOS Apple Silicon and via
-the Microsoft Store on Windows; Linux and Intel macs get the plugin only. It
-loads the extension through a launcher that starts Growser with
-`--load-extension`; an unpacked extension does not persist in a profile on its
-own, so use that launcher (or load `extension/` once by hand from
-chrome://extensions).
+and rebuilds the guides. It installs Growser (the default browser of the
+webharvester tool, for Windows, macOS and Linux) and writes a launcher that
+starts it with `--enable-webharvester`, which enables the bundled extension.
+For any other Chromium browser, use manual mode: load `extension/` from
+chrome://extensions, or launch with `--load-extension=extension`.
 
 ## Commands
 

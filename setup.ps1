@@ -68,9 +68,10 @@ function New-Launcher {
   $launcher = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Growser (webharvester).cmd'
   @"
 @echo off
-rem Starts Growser with the webharvester all-permissions extension in the default profile.
+rem Starts Growser with the bundled webharvester extension enabled.
 rem Close any running Growser first: a second instance on the same profile ignores the flag.
-start "" "$Exe" --load-extension="$ext" %*
+rem On a Growser build without the bundled extension, use --load-extension="$ext" instead.
+start "" "$Exe" --enable-webharvester %*
 "@ | Set-Content -Encoding ASCII $launcher
   Log "Launcher written: $launcher"
   Log "Close Growser, then run that file to start it with the extension loaded."

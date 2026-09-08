@@ -64,10 +64,11 @@ make_launcher_mac() {
   mkdir -p "${HOME}/Applications"
   cat > "${launcher}" <<LAUNCH
 #!/usr/bin/env bash
-# Starts Growser with the webharvester all-permissions extension loaded into
-# the default profile. Quit any running Growser first: a second instance on the
-# same profile will not apply the flag (single-instance).
-exec "${bin}" --load-extension="${ext}" "\$@"
+# Starts Growser with the bundled webharvester extension enabled. Quit any
+# running Growser first: a second instance on the same profile will not apply
+# the flag (single-instance). On a Growser build that does not yet bundle the
+# extension, replace --enable-webharvester with --load-extension="${ext}".
+exec "${bin}" --enable-webharvester "\$@"
 LAUNCH
   chmod +x "${launcher}"
   log "Launcher written: ${launcher}"
@@ -82,7 +83,8 @@ make_launcher_linux() {
   launcher="${REPO}/growser-webharvester.sh"
   cat > "${launcher}" <<LAUNCH
 #!/usr/bin/env bash
-exec "${bin}" --load-extension="${ext}" "\$@"
+# On a Growser build without the bundled extension, use --load-extension="${ext}".
+exec "${bin}" --enable-webharvester "\$@"
 LAUNCH
   chmod +x "${launcher}"
   log "Launcher written: ${launcher}"

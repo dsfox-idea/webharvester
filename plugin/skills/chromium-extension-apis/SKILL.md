@@ -1,6 +1,6 @@
 ---
 name: chromium-extension-apis
-description: Reference for Chromium extension permissions that actually work on this machine — each permission's official API interface plus what it can be used for in the broadest sense. Use when choosing, explaining, or reviewing Chromium/Chrome/Brave extension permissions, deciding which permission an automation needs, or auditing what an extension could do.
+description: Reference for Chromium extension permissions that actually work on this machine — each permission's official API interface plus what it can be used for in the broadest sense, and how to run the webharvester extension (standalone, or via Growser's --enable-webharvester). Use when choosing, explaining, or reviewing Chromium/Chrome/Brave extension permissions, deciding which permission an automation needs, auditing what an extension could do, or setting up the webharvester browser.
 ---
 
 # Chromium Extension APIs
@@ -16,6 +16,26 @@ grants, measured with the webharvester extension. Each guide has two parts:
   in the widest sense.
 
 Measured in 26.905.1 Chromium: 153.0.8010.18 (официальная сборка) (arm64) (Chromium 153.0.8010.18) on 2026-09-07.
+
+## Running webharvester
+
+The webharvester extension (which declares every working permission) can run
+two ways:
+
+- **Standalone, manual.** Load the extension into any Chromium browser:
+  chrome://extensions -> Developer mode -> Load unpacked, or launch with
+  `--load-extension=<path>`. Install this skill/plugin separately. A
+  command-line-loaded unpacked extension does not persist across restarts, so
+  either keep launching with the flag or use the one-time Load unpacked.
+- **With Growser (default).** [Growser](https://growser.org) is the default
+  browser of the webharvester tool for Claude Code (Windows, macOS, Linux). It
+  ships the extension bundled and enables it with a single launch argument,
+  `--enable-webharvester` — no unpacked-extension step, and it persists like a
+  normal installed extension. This is the out-of-the-box path.
+
+To set either up, run the repo's `setup.sh` (macOS/Linux) or `setup.ps1`
+(Windows); `--measure` / `-Measure` installs Growser and regenerates these
+guides from that browser.
 
 ## How to use
 

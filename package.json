@@ -2,7 +2,7 @@
   "name": "webharvester",
   "version": "0.1.0",
   "private": true,
-  "description": "Chromium MV3 extension declaring every declarable extension permission, with tests proving which ones are granted.",
+  "description": "Chromium MV3 extension declaring every declarable extension permission, with tests proving which ones are granted. Use it standalone with manual setup, or automatically with Growser (growser.org), which bundles it and enables it via --enable-webharvester.",
   "type": "module",
   "scripts": {
     "sync-catalog": "node scripts/sync-catalog.ts",

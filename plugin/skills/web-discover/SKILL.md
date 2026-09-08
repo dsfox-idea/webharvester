@@ -1,18 +1,28 @@
 ---
-name: extension-apis
-description: Reference for Chromium extension permissions that actually work on this machine — each permission's official API interface plus what it can be used for in the broadest sense, and how to run the webharvester extension (standalone, or via Growser's --enable-webharvester). Use when choosing, explaining, or reviewing Chromium/Chrome/Brave extension permissions, deciding which permission an automation needs, auditing what an extension could do, or setting up the webharvester browser.
+name: web-discover
+description: Explore and act on the live web through the user's own real, logged-in browser — with their cookies and sessions and none of the headless or bot-wall limits of a plain fetch. Take screenshots, read a page and move or capture data between tabs, click and fill forms on the user's behalf, open and close tabs, and check pages on a timer. Use whenever a task needs to SEE or DO something on a real website as the user would: inspect or extract from a page that needs a login, act inside a web app, capture what is on screen, monitor a page over time, or drive a multi-tab flow — instead of a plain HTTP fetch, a web search, or a headless browser. This is the capability reference for the bundled all-permissions browser extension (web-harvester / Growser --enable-webharvester).
 ---
 
-# Chromium Extension APIs
+# web-discover
 
-One short guide per extension permission that a real browser here actually
-grants, measured with the webharvester extension. Each guide has two parts:
+Let Claude Code explore and act on the live web the way the user does — in the
+user's real, logged-in browser instead of a sandboxed fetch, a headless
+session, or a web search. With the user's own cookies and sessions and none of
+the headless / bot-wall limits, it can take screenshots, read a page and move
+or capture data between tabs, click and fill forms on the user's behalf, open
+and close tabs, and check pages on a timer. The point is to see the web through
+the user's eyes and do things there for them.
+
+Under the hood this is the **web-harvester** browser extension, which holds
+every capability a Chromium extension can. This skill is the capability
+reference: one short guide per permission the extension actually gets, so
+Claude knows which capability to reach for. Each guide has two parts:
 
 - **Interface** — the official description, functions and events, taken from
   the Chromium API schema (`_permission_features.json` and the `*.json` /
   `*.idl` / `*.webidl` files developer.chrome.com is generated from), at
   Chromium revision `96bc3a02d46c85d7573e6f1f899e0dda8a092d47`.
-- **What it's for (broad)** — an authored note on what the permission can do
+- **What it's for (broad)** — an authored note on what the capability enables
   in the widest sense.
 
 Measured in 26.905.1 Chromium: 153.0.8010.18 (официальная сборка) (arm64) (Chromium 153.0.8010.18) on 2026-09-07.
@@ -39,10 +49,18 @@ guides from that browser.
 
 ## How to use
 
-Look up a permission in the table and open its reference file for the full
-interface and use note. To pick a permission for a task, scan the "What it's
-for" notes; to review an extension, read the guides for the permissions it
-declares.
+Reach for a capability by what the task needs, then open its reference for the
+exact API and use note:
+
+- **Act as the user in a page** — `scripting`, `userScripts`, `tabs`, `debugger`, `activeTab`.
+- **Capture what is on screen** — `tabCapture`, `desktopCapture`, `pageCapture`, `favicon`.
+- **Move or keep data** — `storage`, `unlimitedStorage`, `cookies`, `downloads`, `clipboardRead`/`clipboardWrite`.
+- **Reach across the browser** — `tabGroups`, `sessions`, `history`, `bookmarks`, `sidePanel`, `webNavigation`.
+- **Watch or wait** — `alarms`, `idle`, `webRequest`, `declarativeNetRequest`.
+- **Reach local software or identity** — `nativeMessaging`, `identity`, `proxy`.
+
+The two tables below list every capability the extension gets here and the ones
+this browser/OS refuses.
 
 ## Working permissions (62)
 

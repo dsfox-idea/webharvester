@@ -13,7 +13,7 @@
     "test:live": "playwright test --project=live",
     "test:all": "playwright test"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/chrome": "^0.2.9",

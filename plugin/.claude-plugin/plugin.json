@@ -7,5 +7,5 @@
     "email": "dsfox@yandex.ru"
   },
   "keywords": ["chromium", "chrome-extension", "permissions", "browser", "reference"],
-  "license": "UNLICENSED"
+  "license": "MIT"
 }

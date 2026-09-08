@@ -1,5 +1,5 @@
 {
-  "name": "chromium-extension-apis",
+  "name": "web-harvester",
   "description": "One short guide per Chromium extension permission that actually works on this machine: the official API interface plus what each permission can be used for in the broadest sense. Works standalone with manual setup, or automatically with Growser (growser.org), the default browser of the webharvester tool, which bundles the measuring extension and enables it with --enable-webharvester.",
   "version": "0.1.0",
   "author": {

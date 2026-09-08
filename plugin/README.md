@@ -1,4 +1,4 @@
-# chromium-extension-apis (Claude Code plugin)
+# web-harvester (Claude Code plugin)
 
 A skill with one short reference per Chromium extension permission that a real
 browser on this machine actually grants. Each reference has the permission's
@@ -35,7 +35,7 @@ npm run build-guides
 ## Install
 
 ```sh
-claude plugin install chromium-extension-apis --marketplace <this-repo>
+claude plugin install web-harvester --marketplace <this-repo>
 ```
 
 Or point Claude Code at the repo's `.claude-plugin/marketplace.json`.

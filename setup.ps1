@@ -19,7 +19,7 @@ $ErrorActionPreference = 'Stop'
 $Repo = Split-Path -Parent $MyInvocation.MyCommand.Path
 $MarketplaceName = 'webharvester'
 $MarketplaceSlug = 'dsfox-idea/webharvester'  # public repo, used when run outside a clone
-$Plugin = "chromium-extension-apis@$MarketplaceName"
+$Plugin = "web-harvester@$MarketplaceName"
 $StoreProductId = '9P4JQVLX29T9'
 
 function Log  ($m) { Write-Host "[setup] $m" -ForegroundColor Cyan }

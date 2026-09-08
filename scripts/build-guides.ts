@@ -13,7 +13,7 @@ import { ManifestBuilder } from '../src/manifest-builder.ts';
 import { NonWorkingList } from '../src/non-working.ts';
 import { PermissionCatalog } from '../src/catalog.ts';
 
-const skillDir = fileURLToPath(new URL('../plugin/skills/chromium-extension-apis', import.meta.url));
+const skillDir = fileURLToPath(new URL('../plugin/skills/extension-apis', import.meta.url));
 const referencesDir = join(skillDir, 'references');
 
 async function main(): Promise<void> {
@@ -53,7 +53,7 @@ function renderSkill(
     .map((p) => `| \`${p.name}\` | ${p.reason} | ${p.detail} |`)
     .join('\n');
   return `---
-name: chromium-extension-apis
+name: extension-apis
 description: Reference for Chromium extension permissions that actually work on this machine — each permission's official API interface plus what it can be used for in the broadest sense, and how to run the webharvester extension (standalone, or via Growser's --enable-webharvester). Use when choosing, explaining, or reviewing Chromium/Chrome/Brave extension permissions, deciding which permission an automation needs, auditing what an extension could do, or setting up the webharvester browser.
 ---
 

@@ -13,7 +13,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MARKETPLACE_NAME="webharvester"
 MARKETPLACE_SLUG="dsfox-idea/webharvester"  # public repo, used when this script is run outside a clone
-PLUGIN="chromium-extension-apis@${MARKETPLACE_NAME}"
+PLUGIN="web-harvester@${MARKETPLACE_NAME}"
 GROWSER_DMG="https://github.com/dsfox-idea/brave-core/releases/latest/download/Growser-mac-arm64.dmg"
 
 log()  { printf '\033[1;34m[setup]\033[0m %s\n' "$*"; }

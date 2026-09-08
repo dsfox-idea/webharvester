@@ -6,14 +6,20 @@
     "name": "Dmitry Golubnichiy",
     "email": "dsfox@yandex.ru"
   },
+  "renames": {
+    "chromium-extension-apis": "web-harvester"
+  },
   "plugins": [
     {
-      "name": "chromium-extension-apis",
+      "name": "web-harvester",
       "source": "./plugin",
       "description": "One short guide per Chromium extension permission that actually works on this machine: official API interface plus broad-sense use notes.",
       "version": "0.1.0",
       "category": "reference",
-      "author": { "name": "Dmitry Golubnichiy", "email": "dsfox@yandex.ru" }
+      "author": {
+        "name": "Dmitry Golubnichiy",
+        "email": "dsfox@yandex.ru"
+      }
     }
   ]
 }

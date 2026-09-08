@@ -1,5 +1,5 @@
 ---
-name: chromium-extension-apis
+name: extension-apis
 description: Reference for Chromium extension permissions that actually work on this machine — each permission's official API interface plus what it can be used for in the broadest sense, and how to run the webharvester extension (standalone, or via Growser's --enable-webharvester). Use when choosing, explaining, or reviewing Chromium/Chrome/Brave extension permissions, deciding which permission an automation needs, auditing what an extension could do, or setting up the webharvester browser.
 ---
 

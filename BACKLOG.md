@@ -2,7 +2,7 @@
 
 ## Submit the plugin to the community marketplace (deferred)
 
-Deferred on 2026-09-08. Submit `chromium-extension-apis` to Anthropic's
+Deferred on 2026-09-08. Submit `web-harvester` to Anthropic's
 community marketplace when ready.
 
 - Channel: the in-app form only. Console (individual authors):
@@ -22,7 +22,7 @@ passes):
 | --- | --- |
 | Repo | https://github.com/dsfox-idea/webharvester |
 | Plugin subdir | `plugin` |
-| Name | `chromium-extension-apis` |
+| Name | `web-harvester` |
 | Category | reference (or developer-tools) |
 | Homepage | https://webharvester.org |
 | License | MIT |

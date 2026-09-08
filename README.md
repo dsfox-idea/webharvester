@@ -44,7 +44,7 @@ New user, no clone (macOS/Linux):
 
 ```sh
 claude plugin marketplace add dsfox-idea/webharvester
-claude plugin install chromium-extension-apis@webharvester
+claude plugin install web-harvester@webharvester
 ```
 
 Or run the setup script from a clone:

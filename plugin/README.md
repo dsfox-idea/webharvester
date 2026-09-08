@@ -1,8 +1,9 @@
 # web-harvester (Claude Code plugin)
 
-Lets Claude Code explore and act on the live web through the user's own real,
+Lets Claude Code act autonomously on the live web through the user's own real,
 logged-in browser — screenshots, data between tabs, interactive actions on the
-user's behalf, timed checks — instead of a sandboxed fetch or headless session.
+user's behalf, timed checks — carrying a task through end to end instead of a
+sandboxed fetch or headless session.
 The `web-discover` skill is the capability reference for the bundled
 all-permissions browser extension.
 

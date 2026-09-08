@@ -1,6 +1,6 @@
 {
   "name": "web-harvester",
-  "description": "web-harvester lets Claude Code explore and act on the live web through the user's own real, logged-in browser (Growser) — with their cookies and sessions and none of the headless or bot-wall limits: screenshots, reading and moving data between tabs, clicking and filling forms on the user's behalf, opening and closing tabs, and checking pages on a timer. The bundled all-permissions extension provides the capabilities; the web-discover skill is the reference so Claude knows which one to reach for.",
+  "description": "web-harvester lets Claude Code act autonomously on the live web through the user's own real, logged-in browser (Growser) — with their cookies and sessions and none of the headless or bot-wall limits: screenshots, reading and moving data between tabs, clicking and filling forms on the user's behalf, opening and closing tabs, and checking pages on a timer. It lets Claude carry a web task through end to end instead of handing steps back. The bundled all-permissions extension provides the capabilities; the web-discover skill is the reference so Claude knows which one to reach for.",
   "version": "0.1.0",
   "author": {
     "name": "Dmitry Golubnichiy",

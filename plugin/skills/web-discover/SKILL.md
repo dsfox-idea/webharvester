@@ -1,6 +1,6 @@
 ---
 name: web-discover
-description: Explore and act on the live web through the user's own real, logged-in browser — with their cookies and sessions and none of the headless or bot-wall limits of a plain fetch. Take screenshots, read a page and move or capture data between tabs, click and fill forms on the user's behalf, open and close tabs, and check pages on a timer. Use whenever a task needs to SEE or DO something on a real website as the user would: inspect or extract from a page that needs a login, act inside a web app, capture what is on screen, monitor a page over time, or drive a multi-tab flow — instead of a plain HTTP fetch, a web search, or a headless browser. This is the capability reference for the bundled all-permissions browser extension (web-harvester / Growser --enable-webharvester).
+description: Explore and act on the live web through the user's own real, logged-in browser — with their cookies and sessions and none of the headless or bot-wall limits of a plain fetch. Take screenshots, read a page and move or capture data between tabs, click and fill forms on the user's behalf, open and close tabs, and check pages on a timer — so Claude Code can act autonomously on the user's behalf and carry a task through on real sites end to end. Use whenever a task needs to SEE or DO something on a real website as the user would: inspect or extract from a page that needs a login, act inside a web app, capture what is on screen, monitor a page over time, or drive a multi-tab flow — instead of a plain HTTP fetch, a web search, or a headless browser. This is the capability reference for the bundled all-permissions browser extension (web-harvester / Growser --enable-webharvester).
 ---
 
 # web-discover
@@ -10,8 +10,10 @@ user's real, logged-in browser instead of a sandboxed fetch, a headless
 session, or a web search. With the user's own cookies and sessions and none of
 the headless / bot-wall limits, it can take screenshots, read a page and move
 or capture data between tabs, click and fill forms on the user's behalf, open
-and close tabs, and check pages on a timer. The point is to see the web through
-the user's eyes and do things there for them.
+and close tabs, and check pages on a timer. The point is to let Claude Code act
+autonomously: see the web through the user's eyes and take the actions a task
+needs on its own — carrying it through end to end rather than handing steps
+back to the user.
 
 Under the hood this is the **web-harvester** browser extension, which holds
 every capability a Chromium extension can. This skill is the capability

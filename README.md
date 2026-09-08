@@ -1,11 +1,12 @@
 # webharvester
 
-**web-harvester** lets Claude Code explore and act on the live web the way the
+**web-harvester** lets Claude Code act autonomously on the live web the way the
 user does — in the user's real, logged-in browser instead of a sandboxed
 fetch, a headless session, or a web search. With the user's own cookies and
 sessions and none of the headless / bot-wall limits, it can take screenshots,
 read a page and move or capture data between tabs, click and fill forms on the
-user's behalf, open and close tabs, and check pages on a timer.
+user's behalf, open and close tabs, and check pages on a timer — carrying a web
+task through end to end on the user's behalf rather than handing steps back.
 
 It is a Manifest V3 Chromium extension that declares every permission a regular
 extension can declare (93 names, derived from Chromium sources), full host

@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "webharvester",
-  "description": "Chromium extension permission reference generated from Chromium sources and live browser measurement. Standalone, or automatic with Growser (growser.org) via --enable-webharvester.",
+  "description": "Chromium extension permission reference generated from Chromium sources and live browser measurement. Standalone, or automatic with Growser (growser.org) — the default browser of the webharvester tool — via --enable-webharvester.",
   "owner": {
     "name": "Dmitry Golubnichiy",
     "email": "dsfox@yandex.ru"

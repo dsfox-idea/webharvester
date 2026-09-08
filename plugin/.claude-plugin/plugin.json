@@ -6,6 +6,14 @@
     "name": "Dmitry Golubnichiy",
     "email": "dsfox@yandex.ru"
   },
-  "keywords": ["chromium", "chrome-extension", "permissions", "browser", "reference"],
+  "homepage": "https://webharvester.org",
+  "repository": "https://github.com/dsfox-idea/webharvester",
+  "keywords": [
+    "chromium",
+    "chrome-extension",
+    "permissions",
+    "browser",
+    "reference"
+  ],
   "license": "MIT"
 }

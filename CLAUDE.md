@@ -89,6 +89,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - A diagnostic `evaluate` that outlives the CDP call timeout (30 s) keeps
   running in the worker and can leave tabs open: keep diagnostics short and
   check the tab strip afterwards.
+- The `FallbackPass` file (`web-harvester-fallback.json` in the temp
+  directory) is shared by every session on the machine: a live check may
+  remove only the grant it created, never the whole file. Tests pass their
+  own file to `new FallbackPass(file)`.
 - Claude Code 2.1.280 declares only `roots` and `elicitation` to MCP servers:
   `sampling/createMessage` is "Method not found", and a headless `claude -p`
   answers `elicitation/create` at once with `cancel`.

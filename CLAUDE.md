@@ -33,6 +33,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - `plugin/server/` (the `growser` MCP server, `web_search`) is hand-written and
   must stay dependency-free: Claude Code copies `plugin/` into its cache
   without `node_modules`. It must not import from `src/`.
+- Any change under `plugin/` needs a version bump in both
+  `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
+  `claude plugin update` compares only `version` and otherwise keeps the old
+  cached copy. `package.json` is the extension's version; leave it alone.
 - Growser bundles the extension from a DEPS pin (growser#212): edits to
   `extension/` reach Growser only after the pin moves, so the MCP server must
   work with the extension code already shipped.

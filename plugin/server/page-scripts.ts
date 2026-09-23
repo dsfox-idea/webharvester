@@ -89,6 +89,33 @@ export class PageScripts {
       }
       return [...element.childNodes];
     };
+    // Code as rendered: innerText adds an empty line for the <br> that ends each line element (CodeMirror).
+    const codeText = (code: Element): string => {
+      let text = '';
+      const walk = (node: Node): void => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent ?? '';
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE || skipped(node as Element)) return;
+        const element = node as Element;
+        const tag = element.tagName.toUpperCase();
+        if (tag === 'BR') {
+          text += '\n';
+          return;
+        }
+        const ownLine = element !== code && isBlock(element, tag);
+        if (ownLine && text && !text.endsWith('\n')) text += '\n';
+        childrenOf(element).forEach(walk);
+        if (ownLine && text && !text.endsWith('\n')) text += '\n';
+      };
+      walk(code);
+      return text.replace(/\n+$/, '');
+    };
+    // Code blocks stand in the text as placeholders until the whitespace cleanup is done, which must not touch them.
+    const codeBlocks: string[] = [];
+    const codePlaceholder = /\u0000(\d+)\u0000/g;
+    const fenceCode = (text: string): string => text.replace(codePlaceholder, (_, index: string) => `\`\`\`\n${codeBlocks[Number(index)]}\n\`\`\``);
 
     const convert = (node: Node, pre: boolean, depth: number): string => {
       if (node.nodeType === Node.TEXT_NODE) return pre ? (node.textContent ?? '') : (node.textContent ?? '').replace(/\s+/g, ' ');
@@ -125,9 +152,10 @@ export class PageScripts {
         case 'CODE':
           return pre ? inner() : inlineWrap('`', inner());
         case 'PRE':
-          return block(`\`\`\`\n${element.innerText.replace(/\n+$/, '')}\n\`\`\``);
+          codeBlocks.push(codeText(element));
+          return block(`\u0000${codeBlocks.length - 1}\u0000`);
         case 'BLOCKQUOTE':
-          return block(inner().trim().split('\n').map((line) => `> ${line}`).join('\n'));
+          return block(fenceCode(inner().trim().replace(/\n{3,}/g, '\n\n')).split('\n').map((line) => `> ${line}`).join('\n'));
         case 'UL':
         case 'OL': {
           const items = [...element.children].filter((child) => child.tagName === 'LI' && !skipped(child));
@@ -144,7 +172,15 @@ export class PageScripts {
           const cells = rows.map((row) =>
             [...row.children]
               .filter((cell) => cell.tagName === 'TD' || cell.tagName === 'TH')
-              .map((cell) => childrenOf(cell).map((child) => convert(child, pre, depth)).join('').replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim()),
+              .map((cell) =>
+                childrenOf(cell)
+                  .map((child) => convert(child, pre, depth))
+                  .join('')
+                  .replace(codePlaceholder, (_, index: string) => inlineWrap('`', codeBlocks[Number(index)]))
+                  .replace(/\s+/g, ' ')
+                  .replace(/\|/g, '\\|')
+                  .trim(),
+              ),
           );
           // A layout table (nested tables, long cells, a single row or column) reads better as plain blocks.
           const columns = Math.max(0, ...cells.map((row) => row.length));
@@ -165,13 +201,17 @@ export class PageScripts {
     const rootText = root.innerText ?? '';
     let text = rootText;
     if (isHtml) {
-      const markdown = convert(root, false, 0)
-        .replace(/[ \t]+\n/g, '\n')
-        .replace(/\n +(?! |[-*]|\d+\.)/g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
-      // Content the walk cannot see (shadow DOM, unusual markup) must not get lost: keep the plain text then.
-      text = markdown.length >= rootText.length * 0.5 ? markdown : rootText;
+      const markdown = fenceCode(
+        convert(root, false, 0)
+          .replace(/[ \t]+\n/g, '\n')
+          .replace(/\n +(?! |[-*]|\d+\.)/g, '\n')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim(),
+      );
+      // Text the walk left out (content under aria-hidden, in an aside) must not get lost: keep the plain text then.
+      // The options of a select are in innerText but are never content.
+      const optionsLength = [...root.querySelectorAll('select')].reduce((sum, select) => sum + select.innerText.length, 0);
+      text = markdown.length >= (rootText.length - optionsLength) * 0.5 ? markdown : rootText;
     }
 
     const links = [...document.links]

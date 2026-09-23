@@ -79,7 +79,43 @@ test.describe('PageScripts.snapshot', () => {
     expect(result.text).not.toContain('| --- |');
   });
 
-  test('falls back to the plain text when the walk cannot see the content (shadow DOM)', async ({ page }) => {
+  test('keeps code as rendered: indentation, blank lines, one line per line element, no copy button', async ({ page }) => {
+    await page.setContent(`<main><p>Intro</p>
+<pre><code>def f(x):
+    if x:
+        return 1
+
+
+    return 0</code></pre>
+<pre><button>Copy</button><code><div class="cm-line">function f() {<br></div><div class="cm-line">  return 1;<br></div><div class="cm-line"><br></div><div class="cm-line">}<br></div></code></pre>
+</main>`);
+    const { text } = await snapshot(page);
+    expect(text).toContain('```\ndef f(x):\n    if x:\n        return 1\n\n\n    return 0\n```');
+    expect(text).toContain('```\nfunction f() {\n  return 1;\n\n}\n```');
+    expect(text).not.toContain('Copy');
+  });
+
+  test('keeps code inside a quote quoted', async ({ page }) => {
+    await page.setContent('<main><blockquote><p>Note</p><pre>if x:\n    y()</pre></blockquote></main>');
+    expect((await snapshot(page)).text).toBe('> Note\n>\n> ```\n> if x:\n>     y()\n> ```');
+  });
+
+  test('writes code in a table cell as inline code', async ({ page }) => {
+    await page.setContent('<main><table><tr><th>Declaration</th><th>Since</th></tr><tr><td><pre>void reserve( size_type n );</pre></td><td>C++20</td></tr></table></main>');
+    expect((await snapshot(page)).text).toContain('| `void reserve( size_type n );` | C++20 |');
+  });
+
+  test('does not count the options of a select as page text', async ({ page }) => {
+    await page.setContent(`<body><form><select>${'<option>Region name</option>'.repeat(60)}</select></form><div><p>No results found.</p></div></body>`);
+    expect((await snapshot(page)).text).toBe('No results found.');
+  });
+
+  test('falls back to the plain text when the walk leaves most of it out', async ({ page }) => {
+    await page.setContent(`<body><div aria-hidden="true"><p>${'Article text. '.repeat(20)}</p></div><div role="dialog">Accept cookies</div></body>`);
+    expect((await snapshot(page)).text).toContain('Article text.');
+  });
+
+  test('reads open shadow DOM content', async ({ page }) => {
     await page.setContent('<main><div id="host"></div></main>');
     await page.evaluate(() => {
       const shadow = document.getElementById('host')!.attachShadow({ mode: 'open' });

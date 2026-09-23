@@ -44,8 +44,8 @@ npm run build-guides
 
 The plugin also starts the `growser` MCP server (`server/main.ts`, no
 dependencies, Node 22.18+). Its `web_search` tool searches DuckDuckGo in a
-visible tab of the user's Growser (brought to the front so the user can watch)
-and returns titles, URLs and snippets.
+visible, active tab of the user's Growser (so the user can watch) and returns
+titles, URLs and snippets.
 Growser has to run with `--enable-webharvester --remote-debugging-port=9222`;
 when it is not running, the tool starts it with those flags. A human check from
 the engine is left open in the browser for the user and never answered by the

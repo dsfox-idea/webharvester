@@ -86,9 +86,10 @@ chrome://extensions, or launch with `--load-extension=extension`.
 
 The plugin ships an MCP server, `growser`, with one tool, `web_search`. It
 searches DuckDuckGo in a visible tab of the user's own Growser session (the
-tab is made active and its window brought to the front, so the user can watch
-what the tool does), reads titles, URLs and snippets from the page and closes
-the tab.
+tab is made active so the user can watch what the tool does), reads titles,
+URLs and snippets from the page, closes the tab and gives focus back to the
+tab that was active before. Windows does not let Growser take the foreground
+from another app, so keep the Growser window in view to watch.
 
 - Growser must run with `--enable-webharvester --remote-debugging-port=9222`.
   If Growser is not running at all, the tool starts it that way; a Growser

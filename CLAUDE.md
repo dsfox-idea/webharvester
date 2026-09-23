@@ -63,5 +63,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - DuckDuckGo answers a `fetch` from the extension worker with a human check
   (HTTP 202, "bots use DuckDuckGo too"); the same query in a real tab gets
   results. Never solve or work around such a check: leave it to the user.
+- On Windows `chrome.windows.update({focused: true})` does not bring Growser
+  in front of another app (foreground lock), yet `chrome.windows` still
+  reports the window as focused. Check what the user sees with Win32
+  `GetForegroundWindow`, never with the Chrome API.
 - On Windows `fs.existsSync` is false for a Microsoft Store app alias
   (`WindowsApps\growser.exe`; `stat` fails with EACCES); use `lstatSync`.

@@ -103,7 +103,8 @@ test.describe('ExtensionTabs', () => {
   test('closes the tab it opened when loading fails', async () => {
     const runner = new FakeRunner({ tabId: 4, error: 'page did not finish loading within 20000 ms' }, undefined);
     await expect(new ExtensionTabs(runner).load('https://slow.example/')).rejects.toThrow(/Could not load https:\/\/slow\.example\/ .*20000 ms/);
-    expect(runner.expressions[1]).toBe('chrome.tabs.remove(4)');
+    expect(runner.expressions[1]).toBe(ExtensionTabs.closeExpression({ tabId: 4 }));
+    expect(runner.expressions[1]).toContain('chrome.tabs.remove(4)');
   });
 
   test('reports a failure before any tab existed without closing anything', async () => {

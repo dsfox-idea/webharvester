@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { DuckDuckGoResults, DuckDuckGoSearch, HtmlText, type PageTabs } from '../../plugin/server/duckduckgo.ts';
-import type { LoadedPage } from '../../plugin/server/extension-tabs.ts';
+import type { LoadedPage, TabHandle } from '../../plugin/server/extension-tabs.ts';
 
 const fixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
 const resultsPage = fixture('ddg-results.html');
@@ -18,11 +18,11 @@ class FakeTabs implements PageTabs {
 
   async load(url: string): Promise<LoadedPage> {
     this.calls.push(`load ${url}`);
-    return { tabId: 7, url, html: this.html };
+    return { tabId: 7, previousTabId: 2, url, html: this.html };
   }
 
-  async close(tabId: number): Promise<void> {
-    this.calls.push(`close ${tabId}`);
+  async close(tab: TabHandle): Promise<void> {
+    this.calls.push(`close ${tab.tabId} back to ${tab.previousTabId}`);
   }
 
   async reveal(tabId: number): Promise<void> {
@@ -123,7 +123,7 @@ test.describe('DuckDuckGoSearch', () => {
     const outcome = await new DuckDuckGoSearch(tabs).search('кириллица & co', 2);
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent('кириллица & co')}`;
     expect(outcome).toEqual({ url, results: DuckDuckGoResults.parse(resultsPage, 2) });
-    expect(tabs.calls).toEqual([`load ${url}`, 'close 7']);
+    expect(tabs.calls).toEqual([`load ${url}`, 'close 7 back to 2']);
   });
 
   test('on a human check leaves the tab open and active and fails without parsing', async () => {

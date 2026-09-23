@@ -1,4 +1,4 @@
-import type { LoadedPage } from './extension-tabs.ts';
+import type { LoadedPage, TabHandle } from './extension-tabs.ts';
 import { log } from './log.ts';
 
 export interface SearchResult {
@@ -15,7 +15,7 @@ export interface SearchOutcome {
 /** What the search needs from the browser: load a page in a tab, then close it or hand it to the user. */
 export interface PageTabs {
   load(url: string): Promise<LoadedPage>;
-  close(tabId: number): Promise<void>;
+  close(tab: TabHandle): Promise<void>;
   reveal(tabId: number): Promise<void>;
 }
 
@@ -179,7 +179,7 @@ export class DuckDuckGoSearch {
           'Do not try to solve it: ask the user to complete it there, then run web_search again.',
       );
     }
-    await this.tabs.close(page.tabId);
+    await this.tabs.close(page);
     const results = DuckDuckGoResults.parse(page.html, limit);
     log(`ddg ${JSON.stringify(query)}: ${page.html.length} chars, ${results.length} results`);
     return { url, results };

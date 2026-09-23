@@ -117,13 +117,13 @@ export class PageScripts {
     const codePlaceholder = /\u0000(\d+)\u0000/g;
     const fenceCode = (text: string): string => text.replace(codePlaceholder, (_, index: string) => `\`\`\`\n${codeBlocks[Number(index)]}\n\`\`\``);
 
-    const convert = (node: Node, pre: boolean, depth: number): string => {
-      if (node.nodeType === Node.TEXT_NODE) return pre ? (node.textContent ?? '') : (node.textContent ?? '').replace(/\s+/g, ' ');
+    const convert = (node: Node, depth: number): string => {
+      if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').replace(/\s+/g, ' ');
       if (node.nodeType !== Node.ELEMENT_NODE) return '';
       const element = node as HTMLElement;
       if (skipped(element)) return '';
       const tag = element.tagName.toUpperCase();
-      const inner = (): string => childrenOf(element).map((child) => convert(child, pre, depth)).join('');
+      const inner = (): string => childrenOf(element).map((child) => convert(child, depth)).join('');
       if (/^H[1-6]$/.test(tag)) return block(`${'#'.repeat(Number(tag[1]))} ${inner().replace(/\s+/g, ' ').trim()}`);
       switch (tag) {
         case 'BR':
@@ -150,7 +150,7 @@ export class PageScripts {
         case 'I':
           return inlineWrap('*', inner());
         case 'CODE':
-          return pre ? inner() : inlineWrap('`', inner());
+          return inlineWrap('`', inner());
         case 'PRE':
           codeBlocks.push(codeText(element));
           return block(`\u0000${codeBlocks.length - 1}\u0000`);
@@ -161,7 +161,7 @@ export class PageScripts {
           const items = [...element.children].filter((child) => child.tagName === 'LI' && !skipped(child));
           const lines = items
             .map((item, index) => {
-              const content = childrenOf(item).map((child) => convert(child, pre, depth + 1)).join('').trim().replace(/\n{2,}/g, '\n');
+              const content = childrenOf(item).map((child) => convert(child, depth + 1)).join('').trim().replace(/\n{2,}/g, '\n');
               return content ? `${'  '.repeat(depth)}${tag === 'OL' ? `${index + 1}.` : '-'} ${content}` : '';
             })
             .filter(Boolean);
@@ -174,7 +174,7 @@ export class PageScripts {
               .filter((cell) => cell.tagName === 'TD' || cell.tagName === 'TH')
               .map((cell) =>
                 childrenOf(cell)
-                  .map((child) => convert(child, pre, depth))
+                  .map((child) => convert(child, depth))
                   .join('')
                   .replace(codePlaceholder, (_, index: string) => inlineWrap('`', codeBlocks[Number(index)]))
                   .replace(/\s+/g, ' ')
@@ -202,7 +202,7 @@ export class PageScripts {
     let text = rootText;
     if (isHtml) {
       const markdown = fenceCode(
-        convert(root, false, 0)
+        convert(root, 0)
           .replace(/[ \t]+\n/g, '\n')
           .replace(/\n +(?! |[-*]|\d+\.)/g, '\n')
           .replace(/\n{3,}/g, '\n\n')

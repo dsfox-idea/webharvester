@@ -1,6 +1,6 @@
 import type { TabHandle } from './extension-tabs.ts';
+import { type BuiltInTool, FallbackPass } from './fallback-pass.ts';
 import { log } from './log.ts';
-import type { AskUser } from './mcp-server.ts';
 
 export interface GateTabs {
   reveal(tabId: number): Promise<void>;
@@ -8,48 +8,63 @@ export interface GateTabs {
   waitForLoad(tabId: number): Promise<void>;
 }
 
+/** The built-in tool that may repeat the call if the check stays, and the host it may reach. */
+export interface Fallback {
+  tool: BuiltInTool;
+  host?: string;
+}
+
 /**
  * What happens when a site answers with a human check (CAPTCHA) instead of the
- * page: the tab is shown, the user is asked through Claude Code to complete the
- * check in Growser, and the same tab is read again. The check itself is never
- * answered by this code. Without a way to ask (headless session, no
- * elicitation), the tab stays open and the tool fails with that request.
+ * page: the tab is shown and read again for up to 15 s, which is enough for a
+ * check that clears by itself or that the user completes in Growser. A check
+ * that stays closes the tab and lets the built-in tool repeat the call; the
+ * session is never stopped to ask. The check itself is never answered here.
  */
 export class HumanCheckGate {
-  static readonly maxRounds = 3;
-  static readonly cannotAsk: AskUser = async () => 'unavailable';
+  static readonly waitMs = 15_000;
+  static readonly pollMs = 1_000;
 
   private readonly tabs: GateTabs;
-  private readonly askUser: AskUser;
+  private readonly fallbackPass: FallbackPass;
+  private readonly now: () => number;
+  private readonly sleep: (ms: number) => Promise<void>;
 
-  constructor(tabs: GateTabs, askUser: AskUser) {
+  constructor(
+    tabs: GateTabs,
+    fallbackPass: FallbackPass = new FallbackPass(),
+    now: () => number = Date.now,
+    sleep: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  ) {
     this.tabs = tabs;
-    this.askUser = askUser;
+    this.fallbackPass = fallbackPass;
+    this.now = now;
+    this.sleep = sleep;
   }
 
-  /** Resolves with the first reading that is not a check; `tool` names the call to repeat after a manual check. */
-  async pass<T>(tab: TabHandle, site: string, first: T, isCheck: (reading: T) => boolean, reread: () => Promise<T>, tool: string): Promise<T> {
-    let reading = first;
-    for (let round = 1; isCheck(reading); round += 1) {
-      await this.tabs.reveal(tab.tabId);
-      const answer =
-        round > HumanCheckGate.maxRounds
-          ? 'unavailable'
-          : await this.askUser(`${site} shows a human check (CAPTCHA) in the active Growser tab. Complete it there yourself, then confirm here to continue.`);
-      log(`${site}: human check, round ${round}, user ${answer}`);
-      if (answer === 'declined') {
-        await this.tabs.close(tab).catch(() => undefined);
-        throw new Error(`The user declined the human check at ${site}; the page was not read.`);
-      }
-      if (answer === 'unavailable') {
-        throw new Error(
-          `${site} answered with a human check (CAPTCHA) instead of the page. It is open in the active Growser tab. ` +
-            `Do not try to solve it: ask the user to complete it there, then run ${tool} again.`,
-        );
-      }
+  /** Resolves with the first reading that is not a check. */
+  async pass<T>(tab: TabHandle, site: string, first: T, isCheck: (reading: T) => boolean, reread: () => Promise<T>, fallback: Fallback): Promise<T> {
+    if (!isCheck(first)) return first;
+    log(`${site}: human check, waiting up to ${HumanCheckGate.waitMs} ms`);
+    await this.tabs.reveal(tab.tabId);
+    const deadline = this.now() + HumanCheckGate.waitMs;
+    while (this.now() < deadline) {
+      await this.sleep(HumanCheckGate.pollMs);
       await this.tabs.waitForLoad(tab.tabId);
-      reading = await reread();
+      const reading = await reread();
+      if (!isCheck(reading)) {
+        log(`${site}: human check cleared`);
+        return reading;
+      }
     }
-    return reading;
+    await this.tabs.close(tab).catch(() => undefined);
+    this.fallbackPass.grant(fallback.tool, fallback.host);
+    const scope = fallback.host ? ` for ${fallback.host}` : '';
+    log(`${site}: human check stayed, ${fallback.tool} allowed${scope}`);
+    throw new Error(
+      `${site} showed a human check (CAPTCHA) that did not clear within ${HumanCheckGate.waitMs / 1000} s; the tab was closed. ` +
+        `Repeat this call with the built-in ${fallback.tool}: the web-harvester hook allows it${scope} for ${FallbackPass.ttlMs / 60_000} minutes. ` +
+        'Never solve a human check yourself.',
+    );
   }
 }

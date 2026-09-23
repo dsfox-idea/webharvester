@@ -1,7 +1,6 @@
 import type { LoadedPage, TabHandle } from './extension-tabs.ts';
 import { HumanCheckGate } from './human-check-gate.ts';
 import { log } from './log.ts';
-import type { AskUser } from './mcp-server.ts';
 
 export interface SearchResult {
   title: string;
@@ -157,32 +156,29 @@ export class DuckDuckGoResults {
 /**
  * Searches DuckDuckGo's no-JS page in a visible tab of the user's Growser,
  * the way the user would, and parses the rendered HTML here. A human check is
- * never answered by this code: HumanCheckGate hands it to the user.
+ * never answered by this code: HumanCheckGate waits for it or falls back.
  */
 export class DuckDuckGoSearch {
   static readonly endpoint = 'https://html.duckduckgo.com/html/';
 
   private readonly tabs: PageTabs;
+  private readonly gate: HumanCheckGate;
 
-  constructor(tabs: PageTabs) {
+  constructor(tabs: PageTabs, gate: HumanCheckGate = new HumanCheckGate(tabs)) {
     this.tabs = tabs;
+    this.gate = gate;
   }
 
   static url(query: string): string {
     return `${DuckDuckGoSearch.endpoint}?q=${encodeURIComponent(query)}`;
   }
 
-  async search(query: string, limit: number, askUser: AskUser = HumanCheckGate.cannotAsk): Promise<SearchOutcome> {
+  async search(query: string, limit: number): Promise<SearchOutcome> {
     const url = DuckDuckGoSearch.url(query);
     const page = await this.tabs.load(url);
-    const html = await new HumanCheckGate(this.tabs, askUser).pass(
-      page,
-      'DuckDuckGo',
-      page.html,
-      DuckDuckGoResults.isChallenge,
-      () => this.tabs.html(page.tabId),
-      'web_search',
-    );
+    const html = await this.gate.pass(page, 'DuckDuckGo', page.html, DuckDuckGoResults.isChallenge, () => this.tabs.html(page.tabId), {
+      tool: 'WebSearch',
+    });
     await this.tabs.close(page);
     const results = DuckDuckGoResults.parse(html, limit);
     log(`ddg ${JSON.stringify(query)}: ${html.length} chars, ${results.length} results`);

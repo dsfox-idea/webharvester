@@ -1,12 +1,12 @@
 import type { BrowserGate } from './growser.ts';
-import type { AskUser, ToolContext, ToolDefinition } from './mcp-server.ts';
+import type { ToolDefinition } from './mcp-server.ts';
 import type { PageDigest } from './page-digest.ts';
 import type { ReadPage } from './page-fetcher.ts';
 import type { PageLink, PageSnapshot } from './page-scripts.ts';
 
 export interface PageSource {
-  /** `reuse`: a recent snapshot of the URL will do; `askUser` hands a human check to the user. */
-  fetch(url: string, reuse: boolean, askUser: AskUser): Promise<ReadPage>;
+  /** `reuse`: a recent snapshot of the URL will do. */
+  fetch(url: string, reuse: boolean): Promise<ReadPage>;
 }
 
 interface FetchRequest {
@@ -32,8 +32,9 @@ export class WebFetchTool implements ToolDefinition {
     '`prompt`, like the built-in WebFetch, the page goes to Claude Haiku and only its answer comes back (saves context, ' +
     'takes a few seconds more). JSON and plain-text URLs come back as raw text; PDFs are not supported. Prefer this ' +
     'over the built-in WebFetch. Long pages come in slices: call again with start_index to continue, which reuses the ' +
-    'page read in the last 15 minutes. Starts Growser if it is not running. If the site shows a human check, the user ' +
-    'is asked to complete it in Growser and the page is read afterwards; never solve such a check yourself.';
+    'page read in the last 15 minutes. Starts Growser if it is not running. If the site shows a human check, the tool ' +
+    'waits up to 15 s for it to clear (the user may complete it in Growser); if it stays, the tool says so and the ' +
+    'built-in WebFetch may read that site instead. Never solve such a check yourself.';
   readonly inputSchema = {
     type: 'object',
     properties: {
@@ -146,10 +147,10 @@ export class WebFetchTool implements ToolDefinition {
     return value.trim();
   }
 
-  async call(args: Record<string, unknown>, context: ToolContext): Promise<string> {
+  async call(args: Record<string, unknown>): Promise<string> {
     const request = WebFetchTool.validate(args);
     await this.browser.ensureReady();
-    const read = await this.pages.fetch(request.url, request.startIndex > 0 && request.prompt === undefined, context.askUser);
+    const read = await this.pages.fetch(request.url, request.startIndex > 0 && request.prompt === undefined);
     if (request.prompt === undefined) return WebFetchTool.format(read, request);
     const shownAt = Date.now(); // the page's age is not the time the model took
     return WebFetchTool.formatAnswer(read, request, await this.digest.answer(request.prompt, read.page), shownAt);

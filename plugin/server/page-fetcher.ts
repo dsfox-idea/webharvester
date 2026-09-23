@@ -1,7 +1,7 @@
 import type { OpenTab, TabHandle } from './extension-tabs.ts';
+import { FallbackPass } from './fallback-pass.ts';
 import { HumanCheckGate } from './human-check-gate.ts';
 import { log } from './log.ts';
-import type { AskUser } from './mcp-server.ts';
 import { PageScripts, type PageSnapshot } from './page-scripts.ts';
 
 /** What reading a page needs from the browser. */
@@ -34,7 +34,7 @@ export class HumanCheck {
 
 /**
  * Reads a page in a visible tab of the user's Growser, with the user's session.
- * A human check is never answered here: HumanCheckGate hands it to the user.
+ * A human check is never answered here: HumanCheckGate waits for it or falls back.
  * Snapshots are kept for 15 minutes (as the built-in WebFetch caches pages) so
  * that reading the rest of a long page does not open it again.
  */
@@ -45,31 +45,36 @@ export class PageFetcher {
 
   private readonly tabs: ReadableTabs;
   private readonly now: () => number;
+  private readonly gate: HumanCheckGate;
   private readonly cache = new Map<string, ReadPage>();
 
-  constructor(tabs: ReadableTabs, now: () => number = Date.now) {
+  constructor(tabs: ReadableTabs, now: () => number = Date.now, gate: HumanCheckGate = new HumanCheckGate(tabs)) {
     this.tabs = tabs;
     this.now = now;
+    this.gate = gate;
   }
 
   /** `reuse`: a snapshot of this URL from the last 15 minutes will do (continuing a long page). */
-  async fetch(url: string, reuse = false, askUser: AskUser = HumanCheckGate.cannotAsk): Promise<ReadPage> {
+  async fetch(url: string, reuse = false): Promise<ReadPage> {
     const cached = this.cache.get(url);
     if (reuse && cached && this.now() - cached.readAt < PageFetcher.cacheTtlMs) {
       log(`fetch ${url}: reusing the snapshot read ${Math.round((this.now() - cached.readAt) / 1000)} s ago`);
       return cached;
     }
-    const read = { page: await this.read(url, askUser), readAt: this.now() };
+    const read = { page: await this.read(url), readAt: this.now() };
     this.cache.delete(url);
     this.cache.set(url, read);
     if (this.cache.size > PageFetcher.cacheSize) this.cache.delete(this.cache.keys().next().value!);
     return read;
   }
 
-  private async read(url: string, askUser: AskUser): Promise<PageSnapshot> {
+  private async read(url: string): Promise<PageSnapshot> {
     const tab = await this.tabs.open(url);
     const first = await this.snapshot(tab);
-    const page = await new HumanCheckGate(this.tabs, askUser).pass(tab, first.url, first, HumanCheck.detect, () => this.snapshot(tab), 'web_fetch');
+    const page = await this.gate.pass(tab, first.url, first, HumanCheck.detect, () => this.snapshot(tab), {
+      tool: 'WebFetch',
+      host: FallbackPass.hostOf(url),
+    });
     await this.tabs.close(tab);
     if (page.contentType === 'application/pdf') throw new Error(`${page.url} is a PDF; web_fetch reads HTML and text pages only`);
     log(`fetch ${url}: ${page.contentType}, ${page.scope} content, ${page.text.length} chars, ${page.links.length} links`);

@@ -1,10 +1,10 @@
 import { DomainFilter } from './domain-filter.ts';
 import type { SearchOutcome } from './duckduckgo.ts';
 import type { BrowserGate } from './growser.ts';
-import type { AskUser, ToolContext, ToolDefinition } from './mcp-server.ts';
+import type { ToolDefinition } from './mcp-server.ts';
 
 export interface Searcher {
-  search(query: string, limit: number, askUser: AskUser): Promise<SearchOutcome>;
+  search(query: string, limit: number): Promise<SearchOutcome>;
 }
 
 interface SearchRequest {
@@ -26,8 +26,9 @@ export class WebSearchTool implements ToolDefinition {
     'reads titles, URLs and snippets, and closes the tab, so results match what the user sees. Prefer this over the ' +
     'built-in WebSearch. allowed_domains / blocked_domains filter results (a domain covers its subdomains). After ' +
     'answering from results, end with a "Sources:" list of the URLs you used as markdown links. Starts Growser if it ' +
-    'is not running. If the engine shows a human check, the user is asked to complete it in Growser and the search ' +
-    'continues afterwards; never solve such a check yourself.';
+    'is not running. If the engine shows a human check, the tool waits up to 15 s for it to clear (the user may ' +
+    'complete it in Growser); if it stays, the tool says so and the built-in WebSearch may repeat the search. Never ' +
+    'solve such a check yourself.';
   readonly inputSchema = {
     type: 'object',
     properties: {
@@ -73,11 +74,11 @@ export class WebSearchTool implements ToolDefinition {
     return [header, ...entries].join('\n\n');
   }
 
-  async call(args: Record<string, unknown>, context: ToolContext): Promise<string> {
+  async call(args: Record<string, unknown>): Promise<string> {
     const { query, limit, domains } = WebSearchTool.validate(args);
     const sent = [query, domains.siteOperators()].filter(Boolean).join(' ');
     await this.browser.ensureReady();
-    const outcome = await this.searcher.search(sent, WebSearchTool.maxLimit, context.askUser);
+    const outcome = await this.searcher.search(sent, WebSearchTool.maxLimit);
     const results = outcome.results.filter((result) => domains.matches(result.url)).slice(0, limit);
     if (results.length > 0) return WebSearchTool.format(sent, { ...outcome, results });
     return `DuckDuckGo via Growser, ${JSON.stringify(sent)}: no results (${outcome.url})`;

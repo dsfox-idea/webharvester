@@ -116,13 +116,17 @@ from another app, so keep the Growser window in view to watch.
   server wakes it through the DevTools protocol (`ServiceWorker.startWorker`)
   and then uses its `tabs` and `scripting` permissions.
 - If a site shows a human check (CAPTCHA) instead of the page, the tab is made
-  active and Claude Code asks the user (MCP elicitation) to complete it in
-  Growser; after the confirmation the same tab is read again. Declining closes
-  the tab. Where nobody can be asked (headless `claude -p`), the tab stays open
-  and the call fails with that request. The tools never answer a check.
+  active and read again every second for up to 15 s: a check that clears by
+  itself or that the user completes in Growser meanwhile lets the call go on.
+  A check that stays closes the tab, and the call fails with a note to repeat
+  it with the built-in `WebSearch` or `WebFetch` (for that site), which the
+  hook then allows for 10 minutes (`FallbackPass`, a small file in the temp
+  directory). The session is never stopped to ask. The tools never answer a
+  check.
 - Every session with the plugin is routed here: the server's MCP instructions
   name both tools, and a PreToolUse hook (`plugin/hooks/`) denies the built-in
-  `WebSearch` and `WebFetch`. Disable the plugin to get them back.
+  `WebSearch` and `WebFetch` except under such a fallback grant. Disable the
+  plugin to get them back.
 - Needs Node 22.18+ (it runs `plugin/server/main.ts` with built-in type
   stripping) and nothing else. `GROWSER_CDP_URL` overrides the endpoint,
   `GROWSER_PATH` the browser binary.

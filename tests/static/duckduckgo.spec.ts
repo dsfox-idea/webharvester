@@ -1,7 +1,11 @@
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { DuckDuckGoResults, DuckDuckGoSearch, HtmlText, type PageTabs } from '../../plugin/server/duckduckgo.ts';
 import type { LoadedPage, TabHandle } from '../../plugin/server/extension-tabs.ts';
+import { FallbackPass } from '../../plugin/server/fallback-pass.ts';
+import { HumanCheckGate } from '../../plugin/server/human-check-gate.ts';
 
 const fixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
 const resultsPage = fixture('ddg-results.html');
@@ -42,6 +46,17 @@ class FakeTabs implements PageTabs {
     return this.pages.length > 1 ? this.pages.shift()! : this.pages[0];
   }
 }
+
+/** A search whose human-check wait takes no real time and whose fallback grants go to a temp file. */
+const quickSearch = (tabs: FakeTabs) => {
+  let time = 1_000_000;
+  const now = () => time;
+  const sleep = async (ms: number) => {
+    time += ms;
+  };
+  const pass = new FallbackPass(join(mkdtempSync(join(tmpdir(), 'ddg-')), 'pass.json'), now);
+  return { pass, search: new DuckDuckGoSearch(tabs, new HumanCheckGate(tabs, pass, now, sleep)) };
+};
 
 test.describe('DuckDuckGoResults on a captured page', () => {
   test('reads title, real url and snippet of every organic result', () => {
@@ -139,21 +154,21 @@ test.describe('DuckDuckGoSearch', () => {
     expect(tabs.calls).toEqual([`load ${url}`, 'close 7 back to 2']);
   });
 
-  test('without a way to ask, a human check leaves the tab open and active and fails without parsing', async () => {
+  test('a human check that stays closes the tab, fails without parsing and lets the built-in WebSearch run', async () => {
     const tabs = new FakeTabs(challengePage);
-    await expect(new DuckDuckGoSearch(tabs).search('q', 5)).rejects.toThrow(/human check.*Do not try to solve it.*web_search again/);
-    expect(tabs.calls).toEqual([`load ${DuckDuckGoSearch.url('q')}`, 'reveal 7']);
+    const { pass, search } = quickSearch(tabs);
+    await expect(search.search('q', 5)).rejects.toThrow(/^DuckDuckGo showed a human check .* Repeat this call with the built-in WebSearch/);
+    expect(tabs.calls.slice(0, 2)).toEqual([`load ${DuckDuckGoSearch.url('q')}`, 'reveal 7']);
+    expect(tabs.calls.at(-1)).toBe('close 7 back to 2');
+    expect(pass.allows('WebSearch')).toBe(true);
   });
 
-  test('after the user completes the check, reads the same tab again and returns the results', async () => {
+  test('once the check clears, reads the same tab again and returns the results', async () => {
     const tabs = new FakeTabs(challengePage, resultsPage);
-    const asked: string[] = [];
-    const outcome = await new DuckDuckGoSearch(tabs).search('q', 3, async (message) => {
-      asked.push(message);
-      return 'accepted';
-    });
+    const { pass, search } = quickSearch(tabs);
+    const outcome = await search.search('q', 3);
     expect(outcome.results).toEqual(DuckDuckGoResults.parse(resultsPage, 3));
-    expect(asked).toEqual([expect.stringMatching(/^DuckDuckGo shows a human check .* Complete it there yourself/)]);
     expect(tabs.calls).toEqual([`load ${DuckDuckGoSearch.url('q')}`, 'reveal 7', 'wait 7', 'html 7', 'close 7 back to 2']);
+    expect(pass.allows('WebSearch')).toBe(false);
   });
 });

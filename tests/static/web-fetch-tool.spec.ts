@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 import type { BrowserGate } from '../../plugin/server/growser.ts';
 import type { ReadPage } from '../../plugin/server/page-fetcher.ts';
 import type { PageSnapshot } from '../../plugin/server/page-scripts.ts';
-import type { AskUser } from '../../plugin/server/mcp-server.ts';
 import type { DigestAnswer, PageDigest } from '../../plugin/server/page-digest.ts';
 import { WebFetchTool, type PageSource } from '../../plugin/server/web-fetch-tool.ts';
 
@@ -33,8 +32,8 @@ class Recorder implements BrowserGate, PageSource, PageDigest {
     return 'Chrome/153';
   }
 
-  async fetch(url: string, reuse: boolean, askUser: AskUser): Promise<ReadPage> {
-    this.calls.push(`fetch ${url}${reuse ? ' reuse' : ''}${askUser === askNobody ? '' : ' with another askUser'}`);
+  async fetch(url: string, reuse: boolean): Promise<ReadPage> {
+    this.calls.push(`fetch ${url}${reuse ? ' reuse' : ''}`);
     return { page, readAt: this.readAt };
   }
 
@@ -44,10 +43,9 @@ class Recorder implements BrowserGate, PageSource, PageDigest {
   }
 }
 
-const askNobody: AskUser = async () => 'unavailable';
 const call = (args: Record<string, unknown>, recorder = new Recorder()) => ({
   recorder,
-  result: new WebFetchTool(recorder, recorder, recorder).call(args, { askUser: askNobody }),
+  result: new WebFetchTool(recorder, recorder, recorder).call(args),
 });
 
 test.describe('WebFetchTool', () => {

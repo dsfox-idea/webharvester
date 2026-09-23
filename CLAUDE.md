@@ -35,8 +35,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   without `node_modules`. It must not import from `src/`.
 - Sessions are routed to `web_search` / `web_fetch` by the server's
   `instructions` (put into every session's system prompt) and enforced by
-  `plugin/hooks/` (PreToolUse denies `WebSearch` and `WebFetch`);
-  `tests/static/plugin-routing.spec.ts` guards both.
+  `plugin/hooks/` (PreToolUse denies `WebSearch` and `WebFetch` unless a
+  `FallbackPass` grant, written after a human check that did not clear in
+  15 s, covers the call); `tests/static/plugin-routing.spec.ts` guards both.
 - Code run in the page (`plugin/server/page-scripts.ts`) is serialised by
   `executeScript` from its own source: keep each function self-contained.
   `npm run test:page` runs it in Playwright's bundled Chromium (no extension,
@@ -91,6 +92,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - Claude Code 2.1.280 declares only `roots` and `elicitation` to MCP servers:
   `sampling/createMessage` is "Method not found", and a headless `claude -p`
   answers `elicitation/create` at once with `cancel`.
+- Do not ask the user through MCP elicitation: the accept/decline dialog stops
+  the session and worked badly in practice (removed in 0.7.0). A human check
+  gets 15 s, then the call falls back to the built-in tool.
 - The built-in `WebFetch` summarises with `claude-haiku-4-5`. `claude -p
   --safe-mode --model haiku --tools "" --system-prompt ...` gives the same
   model with the user's sign-in and about 6x fewer tokens than the default

@@ -1,5 +1,10 @@
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { OpenTab, TabHandle } from '../../plugin/server/extension-tabs.ts';
+import { FallbackPass } from '../../plugin/server/fallback-pass.ts';
+import { HumanCheckGate } from '../../plugin/server/human-check-gate.ts';
 import { HumanCheck, PageFetcher, type ReadableTabs } from '../../plugin/server/page-fetcher.ts';
 import { PageScripts, type PageSnapshot } from '../../plugin/server/page-scripts.ts';
 
@@ -47,12 +52,24 @@ class FakeTabs implements ReadableTabs {
   }
 }
 
-/** A clock the test moves by hand. */
+/** A clock the test moves by hand; the gate's `sleep` moves it too. */
 class Clock {
   time = 1_000_000;
 
   readonly now = (): number => this.time;
+  readonly sleep = async (ms: number): Promise<void> => {
+    this.time += ms;
+  };
 }
+
+const challenge: PageSnapshot = { ...article, title: 'Just a moment...', text: 'Verify you are human' };
+
+/** A fetcher whose human-check wait takes no real time and whose fallback grants go to a temp file. */
+const quickFetcher = (tabs: FakeTabs) => {
+  const clock = new Clock();
+  const pass = new FallbackPass(join(mkdtempSync(join(tmpdir(), 'page-fetcher-')), 'pass.json'), clock.now);
+  return { pass, fetcher: new PageFetcher(tabs, clock.now, new HumanCheckGate(tabs, pass, clock.now, clock.sleep)) };
+};
 
 test.describe('PageFetcher', () => {
   test('reads the rendered page, then closes the tab and gives focus back', async () => {
@@ -89,25 +106,28 @@ test.describe('PageFetcher', () => {
   });
 
   test('never caches a failed read', async () => {
-    const tabs = new FakeTabs({ ...article, title: 'Just a moment...' });
-    const fetcher = new PageFetcher(tabs, new Clock().now);
+    const tabs = new FakeTabs(challenge);
+    const { fetcher } = quickFetcher(tabs);
     await expect(fetcher.fetch('https://news.example/a')).rejects.toThrow(/human check/);
     await expect(fetcher.fetch('https://news.example/a', true)).rejects.toThrow(/human check/);
     expect(tabs.calls.filter((call) => call.startsWith('open'))).toHaveLength(2);
   });
 
-  test('on a human check leaves the tab open and active and fails', async () => {
-    const tabs = new FakeTabs({ ...article, title: 'Just a moment...', text: 'Verify you are human' });
-    await expect(new PageFetcher(tabs).fetch('https://news.example/a')).rejects.toThrow(/human check.*Do not try to solve it.*web_fetch again/);
-    expect(tabs.calls.at(-1)).toBe('reveal 9');
-    expect(tabs.calls.some((call) => call.startsWith('close'))).toBe(false);
+  test('a human check that stays closes the tab and lets the built-in WebFetch read the host', async () => {
+    const tabs = new FakeTabs(challenge);
+    const { pass, fetcher } = quickFetcher(tabs);
+    await expect(fetcher.fetch('https://News.Example/a')).rejects.toThrow(/did not clear within 15 s; the tab was closed\. Repeat this call with the built-in WebFetch: .* for news\.example /);
+    expect(tabs.calls.slice(0, 3)).toEqual(['open https://News.Example/a', 'read 9 snapshot [5000]', 'reveal 9']);
+    expect(tabs.calls.at(-1)).toBe('close 9 back to 2');
+    expect(pass.allows('WebFetch', 'news.example')).toBe(true);
   });
 
-  test('reads the same tab again once the user has completed a human check', async () => {
-    const tabs = new FakeTabs({ ...article, title: 'Just a moment...', text: 'Verify you are human' }, article);
-    const read = await new PageFetcher(tabs, new Clock().now).fetch('https://news.example/a', false, async () => 'accepted');
-    expect(read.page).toEqual(article);
+  test('reads the same tab again once the check clears', async () => {
+    const tabs = new FakeTabs(challenge, article);
+    const { pass, fetcher } = quickFetcher(tabs);
+    expect((await fetcher.fetch('https://news.example/a')).page).toEqual(article);
     expect(tabs.calls).toEqual(['open https://news.example/a', 'read 9 snapshot [5000]', 'reveal 9', 'wait 9', 'read 9 snapshot [5000]', 'close 9 back to 2']);
+    expect(pass.allows('WebFetch', 'news.example')).toBe(false);
   });
 
   test('closes the tab when the page cannot be read', async () => {

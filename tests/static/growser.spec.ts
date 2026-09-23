@@ -85,19 +85,34 @@ class FakeRunner implements ScriptRunner {
     this.replies = replies;
   }
 
+  /** A reply that is an Error is thrown, as a failed Runtime.evaluate would be. */
   async evaluate<T>(expression: string): Promise<T> {
     this.expressions.push(expression);
-    return this.replies.shift() as T;
+    const reply = this.replies.shift();
+    if (reply instanceof Error) throw reply;
+    return reply as T;
   }
 }
 
 test.describe('ExtensionTabs', () => {
   test('loads a page in a visible tab, brought to the front, and returns its html', async () => {
-    const runner = new FakeRunner({ tabId: 3, url: 'https://x.example/?q=%22', html: '<html></html>' });
-    expect(await new ExtensionTabs(runner).load('https://x.example/?q="')).toEqual({ tabId: 3, url: 'https://x.example/?q=%22', html: '<html></html>' });
+    const runner = new FakeRunner({ tabId: 3, previousTabId: 1, url: 'https://x.example/?q=%22' }, '<html></html>');
+    expect(await new ExtensionTabs(runner).load('https://x.example/?q="')).toEqual({
+      tabId: 3,
+      previousTabId: 1,
+      url: 'https://x.example/?q=%22',
+      html: '<html></html>',
+    });
     expect(runner.expressions[0]).toContain('url: "https://x.example/?q=\\""');
     expect(runner.expressions[0]).toContain('active: true');
     expect(runner.expressions[0]).toContain('chrome.windows.update(tab.windowId, { focused: true })');
+    expect(runner.expressions[1]).toContain('target: { tabId: 3 }');
+  });
+
+  test('closes the tab and gives focus back when reading the page fails', async () => {
+    const runner = new FakeRunner({ tabId: 5, previousTabId: 1, url: 'chrome-error://chromewebdata/' }, new Error('Cannot access contents'), undefined);
+    await expect(new ExtensionTabs(runner).load('https://nowhere.example/')).rejects.toThrow(/Could not read https:\/\/nowhere\.example\/ .*Cannot access contents/);
+    expect(runner.expressions[2]).toBe(ExtensionTabs.closeExpression({ tabId: 5, previousTabId: 1 }));
   });
 
   test('closes the tab it opened when loading fails', async () => {

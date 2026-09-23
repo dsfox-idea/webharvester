@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { SearchOutcome } from '../../plugin/server/duckduckgo.ts';
-import { WebSearchTool, type BrowserGate, type Searcher } from '../../plugin/server/web-search-tool.ts';
+import type { BrowserGate } from '../../plugin/server/growser.ts';
+import { WebSearchTool, type Searcher } from '../../plugin/server/web-search-tool.ts';
 
 class Recorder implements BrowserGate, Searcher {
   readonly calls: string[] = [];

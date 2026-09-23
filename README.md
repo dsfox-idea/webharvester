@@ -82,9 +82,13 @@ starts it with `--enable-webharvester`, which enables the bundled extension.
 For any other Chromium browser, use manual mode: load `extension/` from
 chrome://extensions, or launch with `--load-extension=extension`.
 
-## Web search through Growser
+## Web search and fetch through Growser
 
-The plugin ships an MCP server, `growser`, with one tool, `web_search`. It
+The plugin ships an MCP server, `growser`, with two tools. `web_fetch` opens a
+URL in a visible tab of the user's Growser session (cookies and logins), waits
+until the text stops changing, and returns the title, final URL and visible
+text in slices (`max_length`, `start_index`, optional `include_links`); PDFs
+are refused. `web_search`
 searches DuckDuckGo in a visible tab of the user's own Growser session (the
 tab is made active so the user can watch what the tool does), reads titles,
 URLs and snippets from the page, closes the tab and gives focus back to the
@@ -100,8 +104,8 @@ from another app, so keep the Growser window in view to watch.
 - If the engine shows a human check instead of results, the tab stays open and
   active for the user and the call fails. The tool never answers such a check.
 - Every session with the plugin is routed here: the server's MCP instructions
-  name `web_search`, and a PreToolUse hook (`plugin/hooks/`) denies the
-  built-in `WebSearch`. Disable the plugin to get `WebSearch` back.
+  name both tools, and a PreToolUse hook (`plugin/hooks/`) denies the built-in
+  `WebSearch` and `WebFetch`. Disable the plugin to get them back.
 - Needs Node 22.18+ (it runs `plugin/server/main.ts` with built-in type
   stripping) and nothing else. `GROWSER_CDP_URL` overrides the endpoint,
   `GROWSER_PATH` the browser binary.

@@ -1,13 +1,9 @@
 import type { SearchOutcome } from './duckduckgo.ts';
+import type { BrowserGate } from './growser.ts';
 import type { ToolDefinition } from './mcp-server.ts';
 
 export interface Searcher {
   search(query: string, limit: number): Promise<SearchOutcome>;
-}
-
-export interface BrowserGate {
-  /** Resolves once the browser answers; may start it. */
-  ensureReady(): Promise<string>;
 }
 
 interface SearchRequest {

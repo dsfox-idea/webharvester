@@ -6,6 +6,12 @@ import { log } from './log.ts';
 
 const execFileAsync = promisify(execFile);
 
+/** What a tool needs before it touches the browser. */
+export interface BrowserGate {
+  /** Resolves once the browser answers; may start it. */
+  ensureReady(): Promise<string>;
+}
+
 export interface CdpTarget {
   id: string;
   type: string;
@@ -72,7 +78,7 @@ export class GrowserEndpoint {
  * when Growser is not running at all: Chromium hands the arguments of a second
  * launch to the running process and silently drops the flags.
  */
-export class GrowserLauncher {
+export class GrowserLauncher implements BrowserGate {
   private readonly endpoint: GrowserEndpoint;
   private readonly env: NodeJS.ProcessEnv;
   private readonly platform: NodeJS.Platform;

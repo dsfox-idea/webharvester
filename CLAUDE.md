@@ -30,12 +30,15 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   schemas at the catalog revision and merges them with hand-written use notes
   in `src/permission-uses.ts`. Interface text is never hand-edited; use notes
   and `src/api-schema-map.ts` are. Validate with `claude plugin validate plugin`.
-- `plugin/server/` (the `growser` MCP server, `web_search`) is hand-written and
+- `plugin/server/` (the `growser` MCP server: `web_search`, `web_fetch`) is hand-written and
   must stay dependency-free: Claude Code copies `plugin/` into its cache
   without `node_modules`. It must not import from `src/`.
-- Sessions are routed to `web_search` by the server's `instructions` (put into
-  every session's system prompt) and enforced by `plugin/hooks/` (PreToolUse
-  denies `WebSearch`); `tests/static/plugin-routing.spec.ts` guards both.
+- Sessions are routed to `web_search` / `web_fetch` by the server's
+  `instructions` (put into every session's system prompt) and enforced by
+  `plugin/hooks/` (PreToolUse denies `WebSearch` and `WebFetch`);
+  `tests/static/plugin-routing.spec.ts` guards both.
+- Code run in the page (`plugin/server/page-scripts.ts`) is serialised by
+  `executeScript` from its own source: keep each function self-contained.
 - Any change under `plugin/` needs a version bump in both
   `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
   `claude plugin update` compares only `version` and otherwise keeps the old
@@ -70,5 +73,14 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   in front of another app (foreground lock), yet `chrome.windows` still
   reports the window as focused. Check what the user sees with Win32
   `GetForegroundWindow`, never with the Chrome API.
+- `chrome.webNavigation` reports a new tab's first navigation only when it
+  commits (`onBeforeNavigate` arrives together with `onCommitted`). On this
+  machine Growser never fails an unresolvable host: the tab stays `loading`
+  for minutes with no events, although the system DNS answers NXDOMAIN. So
+  `ExtensionTabs.open` catches fast failures via `onErrorOccurred` and relies
+  on its timeout for the rest.
+- A diagnostic `evaluate` that outlives the CDP call timeout (30 s) keeps
+  running in the worker and can leave tabs open: keep diagnostics short and
+  check the tab strip afterwards.
 - On Windows `fs.existsSync` is false for a Microsoft Store app alias
   (`WindowsApps\growser.exe`; `stat` fails with EACCES); use `lstatSync`.

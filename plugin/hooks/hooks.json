@@ -1,13 +1,13 @@
 {
-  "description": "web-harvester: web search goes through Growser, so the built-in WebSearch is denied",
+  "description": "web-harvester: the web is reached through Growser, so the built-in WebSearch and WebFetch are denied",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "WebSearch",
+        "matcher": "^(WebSearch|WebFetch)$",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/websearch-gate.ts\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/web-gate.ts\"",
             "timeout": 10
           }
         ]

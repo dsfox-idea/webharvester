@@ -41,8 +41,12 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   `executeScript` from its own source: keep each function self-contained.
 - Any change under `plugin/` needs a version bump in both
   `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
-  `claude plugin update` compares only `version` and otherwise keeps the old
-  cached copy. `package.json` is the extension's version; leave it alone.
+  installs from GitHub are cached by `version`, and `claude plugin update`
+  compares only `version`. `package.json` is the extension's version; leave
+  it alone. This machine's marketplace is this clone (a directory source):
+  Claude Code runs the plugin straight from `plugin/` here (the server
+  process is `node A:/dev/webharvester/plugin/server/main.ts`), so even
+  uncommitted edits reach new sessions after a restart.
 - Growser bundles the extension from a DEPS pin (growser#212): edits to
   `extension/` reach Growser only after the pin moves, so the MCP server must
   work with the extension code already shipped.

@@ -10,6 +10,7 @@ const page: PageSnapshot = {
   contentType: 'text/html',
   text: '# Heading\n\nBody with 386 hp.',
   scope: 'main',
+  status: 200,
   links: [],
   challengeFrame: false,
 };

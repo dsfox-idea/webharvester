@@ -89,7 +89,8 @@ built-in `WebFetch` and `WebSearch` and take the same kind of arguments.
 
 `web_fetch` opens a URL in a visible tab of the user's Growser session (cookies
 and logins), waits until the text stops changing, and returns the title, final
-URL and the main content as Markdown (headings, links, lists, code, tables;
+URL, the HTTP status when it is not 2xx (read from the page's navigation
+timing) and the main content as Markdown (headings, links, lists, code, tables;
 `main`/`article` when it holds the content, navigation, banners and hidden
 parts left out, shadow DOM included). JSON and plain text come back raw; PDFs
 are refused (the built-in `WebFetch` cannot read them either). Text comes in

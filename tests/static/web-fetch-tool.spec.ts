@@ -11,6 +11,7 @@ const page: PageSnapshot = {
   contentType: 'text/html',
   text: 'abcdefghij',
   scope: 'main',
+  status: 200,
   links: [
     { text: 'One', href: 'https://docs.example/1' },
     { text: '', href: 'https://docs.example/2' },
@@ -79,6 +80,15 @@ test.describe('WebFetchTool', () => {
       'Title: Docs\nURL: https://docs.example/final\nContent: main content of the page, text/html\nText: characters 0-10 of 10\n\nabcdefghij',
     );
     expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/page']);
+  });
+
+  test('names an HTTP status outside 2xx, and none the browser did not report', () => {
+    const request = WebFetchTool.validate({ url: 'https://docs.example/' });
+    const content = (status: number): string => WebFetchTool.format({ page: { ...page, status }, readAt: 0 }, request, 0).split('\n')[2];
+    expect(content(404)).toBe('Content: main content of the page, text/html, HTTP 404');
+    expect(content(503)).toBe('Content: main content of the page, text/html, HTTP 503');
+    expect(content(204)).toBe('Content: main content of the page, text/html');
+    expect(content(0)).toBe('Content: main content of the page, text/html');
   });
 
   test('slices long text, and a continuation may reuse the recent snapshot', async () => {

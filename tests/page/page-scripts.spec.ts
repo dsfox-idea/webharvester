@@ -129,6 +129,16 @@ test.describe('PageScripts.snapshot', () => {
     expect((await snapshot(page)).text).toContain('Shadow text.');
   });
 
+  test('reports the HTTP status of the page', async ({ page }) => {
+    await page.route('https://site.example/**', (route) =>
+      route.fulfill({ status: route.request().url().endsWith('/missing') ? 404 : 200, contentType: 'text/html', body: '<main><p>Page</p></main>' }),
+    );
+    await page.goto('https://site.example/missing');
+    expect((await snapshot(page)).status).toBe(404);
+    await page.goto('https://site.example/found');
+    expect((await snapshot(page)).status).toBe(200);
+  });
+
   test('returns non-HTML documents as raw text', async ({ page }) => {
     await page.goto('data:text/plain,line one%0Aline two **not markdown**');
     const result = await snapshot(page);

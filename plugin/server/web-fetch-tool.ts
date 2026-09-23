@@ -27,7 +27,8 @@ export class WebFetchTool implements ToolDefinition {
   readonly name = 'web_fetch';
   readonly description =
     "Read a web page through the user's own Growser browser: opens the URL in a visible tab of the user's session " +
-    '(their cookies and logins), waits for it to render, and returns the title, final URL and the main content as ' +
+    '(their cookies and logins), waits for it to render, and returns the title, final URL, the HTTP status if it is ' +
+    'not 2xx, and the main content as ' +
     'Markdown (headings, links, lists, code, tables; navigation and hidden parts left out), then closes the tab. With ' +
     '`prompt`, like the built-in WebFetch, the page goes to Claude Haiku and only its answer comes back (saves context, ' +
     'takes a few seconds more). JSON and plain-text URLs come back as raw text; PDFs are not supported. Prefer this ' +
@@ -110,10 +111,12 @@ export class WebFetchTool implements ToolDefinition {
 
   private static header(page: PageSnapshot, readAt: number, now: number): string[] {
     const age = Math.round((now - readAt) / 1000);
+    // An error page reads like any other page; only its status tells.
+    const status = page.status > 0 && (page.status < 200 || page.status > 299) ? `, HTTP ${page.status}` : '';
     return [
       `Title: ${page.title}`,
       `URL: ${page.url}`,
-      `Content: ${page.scope === 'main' ? 'main content of the page' : 'whole page'}, ${page.contentType}${age > 0 ? `, read ${age} s ago` : ''}`,
+      `Content: ${page.scope === 'main' ? 'main content of the page' : 'whole page'}, ${page.contentType}${status}${age > 0 ? `, read ${age} s ago` : ''}`,
     ];
   }
 

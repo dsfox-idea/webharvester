@@ -12,6 +12,8 @@ export interface PageSnapshot {
   text: string;
   /** `main`: the text comes from the page's main/article element; `body`: from the whole page. */
   scope: 'main' | 'body';
+  /** HTTP status of the response that loaded the page; 0 when the browser does not report one. */
+  status: number;
   links: PageLink[];
   /** An iframe of a known human-check provider (Cloudflare Turnstile, reCAPTCHA, hCaptcha). */
   challengeFrame: boolean;
@@ -229,6 +231,7 @@ export class PageScripts {
       contentType: document.contentType,
       text,
       scope,
+      status: (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.responseStatus ?? 0,
       links,
       challengeFrame: [...document.querySelectorAll('iframe')].some((frame) =>
         /challenges\.cloudflare\.com|google\.com\/recaptcha|recaptcha\.net|hcaptcha\.com/.test(frame.src),

@@ -14,6 +14,7 @@ const article: PageSnapshot = {
   contentType: 'text/html',
   text: 'Body text of the article.',
   scope: 'main',
+  status: 200,
   links: [{ text: 'Home', href: 'https://news.example/' }],
   challengeFrame: false,
 };

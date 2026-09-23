@@ -4,6 +4,7 @@ import { PermissionCatalog } from '../../src/catalog.ts';
 import { ManifestBuilder } from '../../src/manifest-builder.ts';
 import { ExtensionIdentity } from '../../src/extension-id.ts';
 import { NonWorkingList } from '../../src/non-working.ts';
+import { ExtensionWorker } from '../../plugin/server/extension-worker.ts';
 
 test.describe('extension/manifest.json', () => {
   const catalog = PermissionCatalog.load();
@@ -56,6 +57,10 @@ test.describe('extension/manifest.json', () => {
     const id = ExtensionIdentity.fromManifest(manifest);
     expect(id).toMatch(/^[a-p]{32}$/);
     expect(ExtensionIdentity.fromManifest(manifest)).toBe(id);
+  });
+
+  test('is the extension the Growser MCP server wakes and drives', () => {
+    expect(ExtensionWorker.webharvesterId).toBe(ExtensionIdentity.fromManifest(manifest));
   });
 });
 

@@ -1,0 +1,589 @@
+<html xmlns="http://www.w3.org/1999/xhtml" data-webharvester="{&quot;url&quot;:&quot;https://html.duckduckgo.com/html/?q=chromium%20extension%20service%20worker%20lifecycle&quot;,&quot;top&quot;:true,&quot;readyState&quot;:&quot;loading&quot;,&quot;injectedAt&quot;:1790179266617}"><!--<![endif]--><head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=1">
+  <meta name="referrer" content="origin">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="robots" content="noindex, nofollow">
+  <title>chromium extension service worker lifecycle at DuckDuckGo</title>
+  <link title="DuckDuckGo (HTML)" type="application/opensearchdescription+xml" rel="search" href="//duckduckgo.com/opensearch_html_v2.xml">
+  <link href="//duckduckgo.com/favicon.ico" rel="shortcut icon">
+  <link rel="icon" href="//duckduckgo.com/favicon.ico" type="image/x-icon">
+  <link id="icon60" rel="apple-touch-icon" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_60x60.png?v=2">
+  <link id="icon76" rel="apple-touch-icon" sizes="76x76" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_76x76.png?v=2">
+  <link id="icon120" rel="apple-touch-icon" sizes="120x120" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_120x120.png?v=2">
+  <link id="icon152" rel="apple-touch-icon" sizes="152x152" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_152x152.png?v=2">
+  <link rel="image_src" href="//duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png">
+  <link rel="stylesheet" media="handheld, all" href="//duckduckgo.com/dist/h.7bcf94631b5964fa5ad7.css" type="text/css">
+</head>
+
+<body class="body--html">
+  <a name="top" id="top"></a>
+
+  <form action="/html/" method="post">
+    <input type="text" name="state_hidden" id="state_hidden">
+  </form>
+
+  <div>
+    <div class="site-wrapper-border"></div>
+
+    <div id="header" class="header cw header--html">
+      <a title="DuckDuckGo" href="/html/" class="header__logo-wrap"></a>
+
+      <form name="x" class="header__form" action="/html/" method="post">
+        <div class="search search--header">
+          <input name="q" autocomplete="off" class="search__input" id="search_form_input_homepage" type="text" value="chromium extension service worker lifecycle">
+          <input name="b" id="search_button_homepage" class="search__button search__button--html" value="" title="Search" alt="Search" type="submit">
+        </div>
+
+        
+        
+        
+        
+
+        <div class="frm__select">
+          <select name="kl">
+            
+              <option value="">All Regions</option>
+            
+              <option value="ar-es">Argentina</option>
+            
+              <option value="au-en">Australia</option>
+            
+              <option value="at-de">Austria</option>
+            
+              <option value="be-fr">Belgium (fr)</option>
+            
+              <option value="be-nl">Belgium (nl)</option>
+            
+              <option value="br-pt">Brazil</option>
+            
+              <option value="bg-bg">Bulgaria</option>
+            
+              <option value="ca-en">Canada (en)</option>
+            
+              <option value="ca-fr">Canada (fr)</option>
+            
+              <option value="ct-ca">Catalonia</option>
+            
+              <option value="cl-es">Chile</option>
+            
+              <option value="cn-zh">China</option>
+            
+              <option value="co-es">Colombia</option>
+            
+              <option value="hr-hr">Croatia</option>
+            
+              <option value="cz-cs">Czech Republic</option>
+            
+              <option value="dk-da">Denmark</option>
+            
+              <option value="ee-et">Estonia</option>
+            
+              <option value="fi-fi">Finland</option>
+            
+              <option value="fr-fr">France</option>
+            
+              <option value="de-de">Germany</option>
+            
+              <option value="gr-el">Greece</option>
+            
+              <option value="hk-tzh">Hong Kong</option>
+            
+              <option value="hu-hu">Hungary</option>
+            
+              <option value="is-is">Iceland</option>
+            
+              <option value="in-en">India (en)</option>
+            
+              <option value="id-en">Indonesia (en)</option>
+            
+              <option value="ie-en">Ireland</option>
+            
+              <option value="il-en">Israel (en)</option>
+            
+              <option value="it-it">Italy</option>
+            
+              <option value="jp-jp">Japan</option>
+            
+              <option value="kr-kr">Korea</option>
+            
+              <option value="lv-lv">Latvia</option>
+            
+              <option value="lt-lt">Lithuania</option>
+            
+              <option value="my-en">Malaysia (en)</option>
+            
+              <option value="mx-es">Mexico</option>
+            
+              <option value="nl-nl">Netherlands</option>
+            
+              <option value="nz-en">New Zealand</option>
+            
+              <option value="no-no">Norway</option>
+            
+              <option value="pk-en">Pakistan (en)</option>
+            
+              <option value="pe-es">Peru</option>
+            
+              <option value="ph-en">Philippines (en)</option>
+            
+              <option value="pl-pl">Poland</option>
+            
+              <option value="pt-pt">Portugal</option>
+            
+              <option value="ro-ro">Romania</option>
+            
+              <option value="ru-ru">Russia</option>
+            
+              <option value="xa-ar">Saudi Arabia</option>
+            
+              <option value="sg-en">Singapore</option>
+            
+              <option value="sk-sk">Slovakia</option>
+            
+              <option value="sl-sl">Slovenia</option>
+            
+              <option value="za-en">South Africa</option>
+            
+              <option value="es-ca">Spain (ca)</option>
+            
+              <option value="es-es">Spain (es)</option>
+            
+              <option value="se-sv">Sweden</option>
+            
+              <option value="ch-de">Switzerland (de)</option>
+            
+              <option value="ch-fr">Switzerland (fr)</option>
+            
+              <option value="tw-tzh">Taiwan</option>
+            
+              <option value="th-en">Thailand (en)</option>
+            
+              <option value="tr-tr">Turkey</option>
+            
+              <option value="us-en">US (English)</option>
+            
+              <option value="us-es">US (Spanish)</option>
+            
+              <option value="ua-uk">Ukraine</option>
+            
+              <option value="uk-en">United Kingdom</option>
+            
+              <option value="vn-en">Vietnam (en)</option>
+            
+          </select>
+        </div>
+
+        <div class="frm__select frm__select--last">
+          <select class="" name="df">
+            
+              <option value="" selected="">Any Time</option>
+            
+              <option value="d">Past Day</option>
+            
+              <option value="w">Past Week</option>
+            
+              <option value="m">Past Month</option>
+            
+              <option value="y">Past Year</option>
+            
+          </select>
+        </div>
+      </form>
+    </div>
+
+    
+
+    
+      <!-- Web results are present -->
+      <div>
+        <div class="serp__results">
+          <div id="links" class="results">
+            
+
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers%2Flifecycle&amp;rut=117f6b890ffc20111af4866a1abd4a1f993ffb4660cf6d3f78cb7be74348c855">The extension service worker lifecycle | Chrome for Developers</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers%2Flifecycle&amp;rut=117f6b890ffc20111af4866a1abd4a1f993ffb4660cf6d3f78cb7be74348c855">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/developer.chrome.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers%2Flifecycle&amp;rut=117f6b890ffc20111af4866a1abd4a1f993ffb4660cf6d3f78cb7be74348c855">
+                            developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers%2Flifecycle&amp;rut=117f6b890ffc20111af4866a1abd4a1f993ffb4660cf6d3f78cb7be74348c855"><b>Extension</b> <b>service</b> <b>workers</b> respond to both standard <b>service</b> <b>worker</b> events and events in <b>extension</b> namespaces. They are presented together because often one type follows another during an extension&amp;#39;s use.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers&amp;rut=5fa69d4528a1e998facab81588497bd266bf79f3bdffcfeee6fef7dc26e6705c">About extension service workers | Chrome for Developers</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers&amp;rut=5fa69d4528a1e998facab81588497bd266bf79f3bdffcfeee6fef7dc26e6705c">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/developer.chrome.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers&amp;rut=5fa69d4528a1e998facab81588497bd266bf79f3bdffcfeee6fef7dc26e6705c">
+                            developer.chrome.com/docs/extensions/develop/concepts/service-workers
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.chrome.com%2Fdocs%2Fextensions%2Fdevelop%2Fconcepts%2Fservice%2Dworkers&amp;rut=5fa69d4528a1e998facab81588497bd266bf79f3bdffcfeee6fef7dc26e6705c"><b>Extension</b> <b>service</b> <b>workers</b> are an extension&amp;#39;s central event handler. That makes them different from web <b>service</b> <b>workers</b>.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchromium.googlesource.com%2Fchromium%2Fsrc%2F%2B%2Flkgr%2Fcontent%2Fbrowser%2Fservice_worker%2FREADME.md&amp;rut=8c08a53f3a91fe29afe5de187b5010749b100a98397712c37e108b2a01810316">Service workers - chromium.googlesource.com</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchromium.googlesource.com%2Fchromium%2Fsrc%2F%2B%2Flkgr%2Fcontent%2Fbrowser%2Fservice_worker%2FREADME.md&amp;rut=8c08a53f3a91fe29afe5de187b5010749b100a98397712c37e108b2a01810316">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/chromium.googlesource.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchromium.googlesource.com%2Fchromium%2Fsrc%2F%2B%2Flkgr%2Fcontent%2Fbrowser%2Fservice_worker%2FREADME.md&amp;rut=8c08a53f3a91fe29afe5de187b5010749b100a98397712c37e108b2a01810316">
+                            chromium.googlesource.com/chromium/src/+/lkgr/content/browser/service_worker/README.md
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchromium.googlesource.com%2Fchromium%2Fsrc%2F%2B%2Flkgr%2Fcontent%2Fbrowser%2Fservice_worker%2FREADME.md&amp;rut=8c08a53f3a91fe29afe5de187b5010749b100a98397712c37e108b2a01810316">Introduction to <b>service</b> <b>workers</b> This section briefly introduces what <b>service</b> <b>workers</b> are. For a more detailed treatment, see the MDN documentation or the <b>Service</b> <b>Worker</b> specification. <b>Service</b> <b>workers</b> are a web platform feature that form the basis of app-like capabilities such as offline support, push notifications, and background sync. A <b>service</b> <b>worker</b> is a event-driven JavaScript program that ...</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgithub.com%2FAlcyone%2DLabs%2Fagent%2Dskills%2Ftree%2Fmain%2Fskills%2Fchrome%2Dextension%2Darchitect%2Freferences%2Fservice%2Dworker%2Dlifecycle&amp;rut=d604235c6e9d898dbce6f760c462de37a5b6f58a26ebaf7f3e4ea1ff829bc073">agent-skills/skills/chrome-extension-architect/references/service ...</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgithub.com%2FAlcyone%2DLabs%2Fagent%2Dskills%2Ftree%2Fmain%2Fskills%2Fchrome%2Dextension%2Darchitect%2Freferences%2Fservice%2Dworker%2Dlifecycle&amp;rut=d604235c6e9d898dbce6f760c462de37a5b6f58a26ebaf7f3e4ea1ff829bc073">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/github.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgithub.com%2FAlcyone%2DLabs%2Fagent%2Dskills%2Ftree%2Fmain%2Fskills%2Fchrome%2Dextension%2Darchitect%2Freferences%2Fservice%2Dworker%2Dlifecycle&amp;rut=d604235c6e9d898dbce6f760c462de37a5b6f58a26ebaf7f3e4ea1ff829bc073">
+                            github.com/Alcyone-Labs/agent-skills/tree/main/skills/chrome-extension-architect/references/service-worker-lifecycle
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgithub.com%2FAlcyone%2DLabs%2Fagent%2Dskills%2Ftree%2Fmain%2Fskills%2Fchrome%2Dextension%2Darchitect%2Freferences%2Fservice%2Dworker%2Dlifecycle&amp;rut=d604235c6e9d898dbce6f760c462de37a5b6f58a26ebaf7f3e4ea1ff829bc073"><b>Service</b> <b>Worker</b> <b>Lifecycle</b> Reference Complete guide to Manifest V3 <b>service</b> <b>worker</b> <b>lifecycle</b>, termination handling, and state management.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchrome.jscn.org%2Fdocs%2Fextensions%2Fmv3%2Fservice_workers%2F&amp;rut=84b6987644a14a362ea018b7df577f2ef2f6d6171b25a67925efad510840f72f">Manage events with service workers - Chrome Developers</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchrome.jscn.org%2Fdocs%2Fextensions%2Fmv3%2Fservice_workers%2F&amp;rut=84b6987644a14a362ea018b7df577f2ef2f6d6171b25a67925efad510840f72f">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/chrome.jscn.org.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchrome.jscn.org%2Fdocs%2Fextensions%2Fmv3%2Fservice_workers%2F&amp;rut=84b6987644a14a362ea018b7df577f2ef2f6d6171b25a67925efad510840f72f">
+                            chrome.jscn.org/docs/extensions/mv3/service_workers/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fchrome.jscn.org%2Fdocs%2Fextensions%2Fmv3%2Fservice_workers%2F&amp;rut=84b6987644a14a362ea018b7df577f2ef2f6d6171b25a67925efad510840f72f">How to respond to browser triggers (events) from a Chrome <b>Extension</b> <b>service</b> <b>worker</b>.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.mozilla.org%2Fen%2DUS%2Fdocs%2FWeb%2FAPI%2FService_Worker_API%2FUsing_Service_Workers&amp;rut=c9008a8b2c3c07a8f364e55ab53a6cffd1d598d1ba50a297e0754c320348edf4">Using Service Workers - Web APIs | MDN - MDN Web Docs</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.mozilla.org%2Fen%2DUS%2Fdocs%2FWeb%2FAPI%2FService_Worker_API%2FUsing_Service_Workers&amp;rut=c9008a8b2c3c07a8f364e55ab53a6cffd1d598d1ba50a297e0754c320348edf4">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/developer.mozilla.org.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.mozilla.org%2Fen%2DUS%2Fdocs%2FWeb%2FAPI%2FService_Worker_API%2FUsing_Service_Workers&amp;rut=c9008a8b2c3c07a8f364e55ab53a6cffd1d598d1ba50a297e0754c320348edf4">
+                            developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
+                          </a>
+                          
+                            <span>&nbsp; &nbsp; 2026-05-29T00:00:00.0000000</span>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fdeveloper.mozilla.org%2Fen%2DUS%2Fdocs%2FWeb%2FAPI%2FService_Worker_API%2FUsing_Service_Workers&amp;rut=c9008a8b2c3c07a8f364e55ab53a6cffd1d598d1ba50a297e0754c320348edf4">This article provides information on getting started with <b>service</b> <b>workers</b>, including basic architecture, registering a <b>service</b> <b>worker</b>, the installation and activation process for a new <b>service</b> <b>worker</b>, updating your <b>service</b> <b>worker</b>, cache control and custom responses, all in the context of an app with offline functionality.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fblog.devops.dev%2Fchrome%2Dextension%2Ddevelopment%2Dthe%2Dcomplete%2Dsystem%2Darchitecture%2Dguide%2Dfor%2D2026%2D9ae81415f93e&amp;rut=ce105d50505ca85b9daebbc0cb80d74c22bca5065acd260a8d81e50463ffbc54">Chrome Extension Development: The Complete System Architecture Guide ...</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fblog.devops.dev%2Fchrome%2Dextension%2Ddevelopment%2Dthe%2Dcomplete%2Dsystem%2Darchitecture%2Dguide%2Dfor%2D2026%2D9ae81415f93e&amp;rut=ce105d50505ca85b9daebbc0cb80d74c22bca5065acd260a8d81e50463ffbc54">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/blog.devops.dev.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fblog.devops.dev%2Fchrome%2Dextension%2Ddevelopment%2Dthe%2Dcomplete%2Dsystem%2Darchitecture%2Dguide%2Dfor%2D2026%2D9ae81415f93e&amp;rut=ce105d50505ca85b9daebbc0cb80d74c22bca5065acd260a8d81e50463ffbc54">
+                            blog.devops.dev/chrome-extension-development-the-complete-system-architecture-guide-for-2026-9ae81415f93e
+                          </a>
+                          
+                            <span>&nbsp; &nbsp; 2026-01-11T00:00:00.0000000</span>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fblog.devops.dev%2Fchrome%2Dextension%2Ddevelopment%2Dthe%2Dcomplete%2Dsystem%2Darchitecture%2Dguide%2Dfor%2D2026%2D9ae81415f93e&amp;rut=ce105d50505ca85b9daebbc0cb80d74c22bca5065acd260a8d81e50463ffbc54">Image 3: Chrome <b>Extension</b> Development Workflow and <b>Service</b> <b>Worker</b> <b>Lifecycle</b> diagrams the temporal flow of <b>extension</b> execution. This shows when <b>service</b> <b>workers</b> spin up (on user interaction, alarm trigger, message received), how they persist state in Chrome storage, and when they terminate.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fmedium.com%2Fwhatfix%2Dtechblog%2Fservice%2Dworker%2Din%2Dbrowser%2Dextensions%2Da3727cd9117a&amp;rut=31f0388a6d6b93822d8fb87dd4813186327283d5c0efb08cd39d1b50387c32bf">Service Worker in Browser Extensions | by Madhura Mehendale ... - Medium</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fmedium.com%2Fwhatfix%2Dtechblog%2Fservice%2Dworker%2Din%2Dbrowser%2Dextensions%2Da3727cd9117a&amp;rut=31f0388a6d6b93822d8fb87dd4813186327283d5c0efb08cd39d1b50387c32bf">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/medium.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fmedium.com%2Fwhatfix%2Dtechblog%2Fservice%2Dworker%2Din%2Dbrowser%2Dextensions%2Da3727cd9117a&amp;rut=31f0388a6d6b93822d8fb87dd4813186327283d5c0efb08cd39d1b50387c32bf">
+                            medium.com/whatfix-techblog/service-worker-in-browser-extensions-a3727cd9117a
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fmedium.com%2Fwhatfix%2Dtechblog%2Fservice%2Dworker%2Din%2Dbrowser%2Dextensions%2Da3727cd9117a&amp;rut=31f0388a6d6b93822d8fb87dd4813186327283d5c0efb08cd39d1b50387c32bf"><b>Service</b> <b>Worker</b> in Browser <b>Extensions</b> Chrome has introduced a new manifest version which will be mandated across all chrome <b>extensions</b>. With the introduction of the new version, the background page ...</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcwskit.khanakia.com%2Fblog%2Fbackground%2Dservice%2Dworkers%2Ddeep%2Ddive&amp;rut=26d689c53974b91c492684b8556c37ea08fe499180dcbbff4f56d7b1c7f7af0a">Background Service Workers: A Deep Dive — CWS Kit Blog</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcwskit.khanakia.com%2Fblog%2Fbackground%2Dservice%2Dworkers%2Ddeep%2Ddive&amp;rut=26d689c53974b91c492684b8556c37ea08fe499180dcbbff4f56d7b1c7f7af0a">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/cwskit.khanakia.com.ico" name="i15">
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcwskit.khanakia.com%2Fblog%2Fbackground%2Dservice%2Dworkers%2Ddeep%2Ddive&amp;rut=26d689c53974b91c492684b8556c37ea08fe499180dcbbff4f56d7b1c7f7af0a">
+                            cwskit.khanakia.com/blog/background-service-workers-deep-dive
+                          </a>
+                          
+                            <span>&nbsp; &nbsp; 2026-04-10T00:00:00.0000000</span>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcwskit.khanakia.com%2Fblog%2Fbackground%2Dservice%2Dworkers%2Ddeep%2Ddive&amp;rut=26d689c53974b91c492684b8556c37ea08fe499180dcbbff4f56d7b1c7f7af0a">Every Chrome <b>extension</b> developer building on Manifest V3 must eventually reckon with the <b>service</b> <b>worker</b>. It is the backbone of your <b>extension's</b> background logic — handling events, coordinating between content scripts and popups, managing alarms, and reacting to browser <b>lifecycle</b> changes.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+
+            
+              
+              
+                <div class="nav-link">
+                  <form action="/html/" method="post">
+                    <input type="submit" class="btn btn--alt" value="Next">
+                    <input type="hidden" name="q" value="chromium extension service worker lifecycle">
+                    <input type="hidden" name="s" value="10">
+                    <input type="hidden" name="nextParams" value="">
+                    <input type="hidden" name="v" value="l">
+                    <input type="hidden" name="o" value="json">
+                    <input type="hidden" name="dc" value="10">
+                    <input type="hidden" name="api" value="d.js">
+                    <input type="hidden" name="vqd" value="redacted">
+
+                    
+                    
+                    
+                      <input name="kl" value="wt-wt" type="hidden">
+                    
+                    
+                    
+                    
+                  </form>
+                </div>
+              
+            
+
+            <div class="feedback-btn">
+              <a rel="nofollow" href="//duckduckgo.com/feedback.html" target="_new">Feedback</a>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+      </div> <!-- links wrapper //-->
+    
+  </div>
+
+  <div id="bottom_spacing2"></div>
+
+  
+    <img src="//duckduckgo.com/t/sl_h">
+  
+
+</body></html>

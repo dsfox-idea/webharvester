@@ -44,7 +44,7 @@ Claude Code plugin) is the capability reference so Claude knows which one to use
 | `tests/static/` | No browser: catalog rules, manifest/catalog sync, availability rules, extension id. |
 | `tests/live/` | Loads the extension into a browser and checks granted permissions, API calls, content script. |
 | `docs/superpowers/specs/` | Design spec. |
-| `plugin/` | Claude Code plugin: one guide per working permission (interface + broad-use note), built by `npm run build-guides`. |
+| `plugin/` | Claude Code plugin: one guide per working permission (interface + broad-use note), built by `npm run build-guides`, and the `growser` MCP server (`plugin/server/`, hand-written) with the `web_search` tool. |
 
 ## Install
 
@@ -81,6 +81,24 @@ webharvester tool, for Windows, macOS and Linux) and writes a launcher that
 starts it with `--enable-webharvester`, which enables the bundled extension.
 For any other Chromium browser, use manual mode: load `extension/` from
 chrome://extensions, or launch with `--load-extension=extension`.
+
+## Web search through Growser
+
+The plugin ships an MCP server, `growser`, with one tool, `web_search`. It
+searches DuckDuckGo in a background tab of the user's own Growser session,
+reads titles, URLs and snippets from the page and closes the tab.
+
+- Growser must run with `--enable-webharvester --remote-debugging-port=9222`.
+  If Growser is not running at all, the tool starts it that way; a Growser
+  already running without the port is left alone and the tool says to close it.
+- The bundled extension's MV3 service worker sleeps after ~30 s idle; the
+  server wakes it through the DevTools protocol (`ServiceWorker.startWorker`)
+  and then uses its `tabs` and `scripting` permissions.
+- If the engine shows a human check instead of results, the tab stays open and
+  active for the user and the call fails. The tool never answers such a check.
+- Needs Node 22.18+ (it runs `plugin/server/main.ts` with built-in type
+  stripping) and nothing else. `GROWSER_CDP_URL` overrides the endpoint,
+  `GROWSER_PATH` the browser binary.
 
 ## Commands
 

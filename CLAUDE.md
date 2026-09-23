@@ -30,6 +30,12 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   schemas at the catalog revision and merges them with hand-written use notes
   in `src/permission-uses.ts`. Interface text is never hand-edited; use notes
   and `src/api-schema-map.ts` are. Validate with `claude plugin validate plugin`.
+- `plugin/server/` (the `growser` MCP server, `web_search`) is hand-written and
+  must stay dependency-free: Claude Code copies `plugin/` into its cache
+  without `node_modules`. It must not import from `src/`.
+- Growser bundles the extension from a DEPS pin (growser#212): edits to
+  `extension/` reach Growser only after the pin moves, so the MCP server must
+  work with the extension code already shipped.
 
 ## Lessons
 
@@ -45,3 +51,13 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - Chromium reports manifest warnings via `chrome.developerPrivate` only in
   developer mode, and as `manifestErrors` (error console) rather than
   `installWarnings` once developer mode is on.
+- The extension's MV3 worker stops after ~30 s idle and leaves `/json/list`.
+  `ServiceWorker.enable` + `ServiceWorker.startWorker({scopeURL:
+  'chrome-extension://<id>/'})` on any page target wakes it in milliseconds.
+- `--remote-debugging-port` on the default profile is refused only under
+  `GOOGLE_CHROME_BRANDING` (`remote_debugging_server.cc`); Growser allows it.
+- DuckDuckGo answers a `fetch` from the extension worker with a human check
+  (HTTP 202, "bots use DuckDuckGo too"); the same query in a real tab gets
+  results. Never solve or work around such a check: leave it to the user.
+- On Windows `fs.existsSync` is false for a Microsoft Store app alias
+  (`WindowsApps\growser.exe`; `stat` fails with EACCES); use `lstatSync`.

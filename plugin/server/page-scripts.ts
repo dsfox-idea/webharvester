@@ -62,14 +62,27 @@ export class PageScripts {
     const blockTags = new Set(['ADDRESS', 'ARTICLE', 'BLOCKQUOTE', 'DD', 'DETAILS', 'DIV', 'DL', 'DT', 'FIELDSET', 'FIGCAPTION', 'FIGURE', 'FOOTER', 'FORM', 'HEADER', 'HGROUP', 'LI', 'MAIN', 'P', 'SECTION', 'SUMMARY', 'TR']);
     const inlineTags = new Set(['A', 'ABBR', 'B', 'BDI', 'BDO', 'CITE', 'CODE', 'DATA', 'DEL', 'DFN', 'EM', 'I', 'IMG', 'INS', 'KBD', 'LABEL', 'MARK', 'Q', 'S', 'SAMP', 'SMALL', 'SPAN', 'STRONG', 'SUB', 'SUP', 'TIME', 'U', 'VAR', 'WBR']);
 
-    const skipped = (element: Element): boolean => {
-      const tag = element.tagName.toUpperCase();
-      if (alwaysSkipped.has(tag) || element.getAttribute('aria-hidden') === 'true') return true;
+    // Hidden parts may hold the content (a cookie dialog marks the whole page aria-hidden); page chrome
+    // (navigation, banners, controls) never does. The visible text of the chrome left out is tallied, so the
+    // fallback below does not mistake a short page under a big menu for content the walk could not see.
+    const chrome = new Set<Element>();
+    let chromeLength = 0;
+    const isChrome = (element: Element, tag: string): boolean => {
+      if (alwaysSkipped.has(tag)) return true;
       const role = element.getAttribute('role') ?? '';
       if (scope === 'body' && (pageChrome.has(tag) || chromeRoles.has(role)) && !element.closest('article')) return true;
-      if (scope === 'main' && (role === 'navigation' || role === 'complementary' || role === 'search')) return true;
+      return scope === 'main' && (role === 'navigation' || role === 'complementary' || role === 'search');
+    };
+    const skipped = (element: Element): boolean => {
       const visibility = element as HTMLElement & { checkVisibility?: (options: object) => boolean };
-      return typeof visibility.checkVisibility === 'function' && !visibility.checkVisibility({ visibilityProperty: true, checkVisibilityCSS: true });
+      if (typeof visibility.checkVisibility === 'function' && !visibility.checkVisibility({ visibilityProperty: true, checkVisibilityCSS: true })) return true;
+      if (element.getAttribute('aria-hidden') === 'true') return true;
+      if (!isChrome(element, element.tagName.toUpperCase())) return false;
+      if (!chrome.has(element)) {
+        chrome.add(element);
+        chromeLength += (element as HTMLElement).innerText?.length ?? 0;
+      }
+      return true;
     };
     const isBlock = (element: Element, tag: string): boolean => {
       if (blockTags.has(tag)) return true;
@@ -221,10 +234,9 @@ export class PageScripts {
           .replace(/\n{3,}/g, '\n\n')
           .trim(),
       );
-      // Text the walk left out (content under aria-hidden, in an aside) must not get lost: keep the plain text then.
-      // The options of a select are in innerText but are never content.
-      const optionsLength = [...root.querySelectorAll('select')].reduce((sum, select) => sum + select.innerText.length, 0);
-      text = markdown.length >= (rootText.length - optionsLength) * 0.5 ? markdown : rootText;
+      // Text the walk left out besides page chrome (content under aria-hidden) must not get lost: keep the plain text
+      // then, and also when the page is nothing but chrome.
+      text = markdown && markdown.length >= (rootText.length - chromeLength) * 0.5 ? markdown : rootText;
     }
 
     const links = [...document.links]

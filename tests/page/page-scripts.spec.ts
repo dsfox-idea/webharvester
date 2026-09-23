@@ -115,6 +115,17 @@ test.describe('PageScripts.snapshot', () => {
     expect((await snapshot(page)).text).toBe('No results found.');
   });
 
+  test('does not count page chrome as page text: a short page under a big menu stays Markdown', async ({ page }) => {
+    await page.setContent(`<body><header><nav>${'<a href="https://site.example/x">Menu item</a> '.repeat(40)}</nav></header>
+      <div><h1>Page not found</h1><p>No such page.</p></div><footer>${'Footer link '.repeat(20)}</footer></body>`);
+    expect((await snapshot(page)).text).toBe('# Page not found\n\nNo such page.');
+  });
+
+  test('returns the plain text of a page that is all chrome rather than nothing', async ({ page }) => {
+    await page.setContent('<body><nav><a href="https://site.example/a">Section A</a> <a href="https://site.example/b">Section B</a></nav></body>');
+    expect((await snapshot(page)).text).toBe('Section A Section B');
+  });
+
   test('falls back to the plain text when the walk leaves most of it out', async ({ page }) => {
     await page.setContent(`<body><div aria-hidden="true"><p>${'Article text. '.repeat(20)}</p></div><div role="dialog">Accept cookies</div></body>`);
     expect((await snapshot(page)).text).toContain('Article text.');

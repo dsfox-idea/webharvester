@@ -113,6 +113,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   root is reachable only through `chrome.dom.openOrClosedShadowRoot`, which
   `executeScript` code has (isolated world, `"dom"` feature context
   `content_script`) and a page or Playwright's `page.evaluate` has not.
+- A session resumed with `--continue` after a restart runs the new server
+  code but still shows the old MCP tool descriptions (seen with 0.7.2); a
+  fresh session (`claude -p` will do) gets the new ones.
 - The built-in `WebFetch` cannot read PDFs (its model gets the raw bytes),
   so refusing PDFs in `web_fetch` is no regression.
 - On Windows `fs.existsSync` is false for a Microsoft Store app alias

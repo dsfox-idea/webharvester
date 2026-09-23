@@ -10,6 +10,7 @@
     "mark-non-working": "node scripts/mark-non-working.ts",
     "build-guides": "node scripts/build-guides.ts",
     "test": "playwright test --project=static",
+    "test:page": "playwright test --project=page",
     "test:live": "playwright test --project=live",
     "test:all": "playwright test"
   },

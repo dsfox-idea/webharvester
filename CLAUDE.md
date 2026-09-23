@@ -39,6 +39,8 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   `tests/static/plugin-routing.spec.ts` guards both.
 - Code run in the page (`plugin/server/page-scripts.ts`) is serialised by
   `executeScript` from its own source: keep each function self-contained.
+  `npm run test:page` runs it in Playwright's bundled Chromium (no extension,
+  no Growser); `npm test` stays browser-free.
 - Any change under `plugin/` needs a version bump in both
   `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
   installs from GitHub are cached by `version`, and `claude plugin update`
@@ -86,5 +88,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - A diagnostic `evaluate` that outlives the CDP call timeout (30 s) keeps
   running in the worker and can leave tabs open: keep diagnostics short and
   check the tab strip afterwards.
+- `innerText` leaves out shadow DOM content; walk the flat tree
+  (`shadowRoot`, `slot.assignedNodes`) to read web components.
+- The built-in `WebFetch` cannot read PDFs (its model gets the raw bytes),
+  so refusing PDFs in `web_fetch` is no regression.
 - On Windows `fs.existsSync` is false for a Microsoft Store app alias
   (`WindowsApps\growser.exe`; `stat` fails with EACCES); use `lstatSync`.

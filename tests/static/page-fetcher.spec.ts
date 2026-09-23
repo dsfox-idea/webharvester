@@ -8,6 +8,7 @@ const article: PageSnapshot = {
   title: 'An article',
   contentType: 'text/html',
   text: 'Body text of the article.',
+  scope: 'main',
   links: [{ text: 'Home', href: 'https://news.example/' }],
   challengeFrame: false,
 };
@@ -41,11 +42,53 @@ class FakeTabs implements ReadableTabs {
   }
 }
 
+/** A clock the test moves by hand. */
+class Clock {
+  time = 1_000_000;
+
+  readonly now = (): number => this.time;
+}
+
 test.describe('PageFetcher', () => {
   test('reads the rendered page, then closes the tab and gives focus back', async () => {
     const tabs = new FakeTabs(article);
-    expect(await new PageFetcher(tabs).fetch('https://news.example/a')).toEqual(article);
+    const clock = new Clock();
+    expect(await new PageFetcher(tabs, clock.now).fetch('https://news.example/a')).toEqual({ page: article, readAt: clock.time });
     expect(tabs.calls).toEqual(['open https://news.example/a', 'read 9 snapshot [5000]', 'close 9 back to 2']);
+  });
+
+  test('a continuation reuses a snapshot younger than 15 minutes; a fresh read always opens the page', async () => {
+    const tabs = new FakeTabs(article);
+    const clock = new Clock();
+    const fetcher = new PageFetcher(tabs, clock.now);
+    const first = await fetcher.fetch('https://news.example/a');
+    clock.time += PageFetcher.cacheTtlMs - 1;
+    expect(await fetcher.fetch('https://news.example/a', true)).toBe(first);
+    expect(tabs.calls.filter((call) => call.startsWith('open'))).toHaveLength(1);
+    await fetcher.fetch('https://news.example/a');
+    expect(tabs.calls.filter((call) => call.startsWith('open'))).toHaveLength(2);
+    clock.time += PageFetcher.cacheTtlMs;
+    expect((await fetcher.fetch('https://news.example/a', true)).readAt).toBe(clock.time);
+    expect(tabs.calls.filter((call) => call.startsWith('open'))).toHaveLength(3);
+  });
+
+  test('keeps only the most recent snapshots', async () => {
+    const tabs = new FakeTabs(article);
+    const fetcher = new PageFetcher(tabs, new Clock().now);
+    for (let index = 0; index <= PageFetcher.cacheSize; index += 1) await fetcher.fetch(`https://news.example/${index}`);
+    await fetcher.fetch('https://news.example/0', true);
+    await fetcher.fetch(`https://news.example/${PageFetcher.cacheSize}`, true);
+    const opens = tabs.calls.filter((call) => call.startsWith('open'));
+    expect(opens).toHaveLength(PageFetcher.cacheSize + 2);
+    expect(opens.at(-1)).toBe('open https://news.example/0');
+  });
+
+  test('never caches a failed read', async () => {
+    const tabs = new FakeTabs({ ...article, title: 'Just a moment...' });
+    const fetcher = new PageFetcher(tabs, new Clock().now);
+    await expect(fetcher.fetch('https://news.example/a')).rejects.toThrow(/human check/);
+    await expect(fetcher.fetch('https://news.example/a', true)).rejects.toThrow(/human check/);
+    expect(tabs.calls.filter((call) => call.startsWith('open'))).toHaveLength(2);
   });
 
   test('on a human check leaves the tab open and active and fails', async () => {

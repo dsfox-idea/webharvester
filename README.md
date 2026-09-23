@@ -84,11 +84,21 @@ chrome://extensions, or launch with `--load-extension=extension`.
 
 ## Web search and fetch through Growser
 
-The plugin ships an MCP server, `growser`, with two tools. `web_fetch` opens a
-URL in a visible tab of the user's Growser session (cookies and logins), waits
-until the text stops changing, and returns the title, final URL and visible
-text in slices (`max_length`, `start_index`, optional `include_links`); PDFs
-are refused. `web_search`
+The plugin ships an MCP server, `growser`, with two tools that stand in for the
+built-in `WebFetch` and `WebSearch` and take the same kind of arguments.
+
+`web_fetch` opens a URL in a visible tab of the user's Growser session (cookies
+and logins), waits until the text stops changing, and returns the title, final
+URL and the main content as Markdown (headings, links, lists, code, tables;
+`main`/`article` when it holds the content, navigation, banners and hidden
+parts left out, shadow DOM included). JSON and plain text come back raw; PDFs
+are refused (the built-in `WebFetch` cannot read them either). Text comes in
+slices (`max_length`, `start_index`, optional `include_links`); a continuation
+reuses the snapshot read in the last 15 minutes, a fresh read always opens the
+page.
+
+`web_search` takes `allowed_domains` / `blocked_domains` (sent as `site:`
+operators and checked again on every result) and returns up to 10 results. It
 searches DuckDuckGo in a visible tab of the user's own Growser session (the
 tab is made active so the user can watch what the tool does), reads titles,
 URLs and snippets from the page, closes the tab and gives focus back to the

@@ -1,9 +1,11 @@
 import type { BrowserGate } from './growser.ts';
 import type { ToolDefinition } from './mcp-server.ts';
+import type { ReadPage } from './page-fetcher.ts';
 import type { PageLink, PageSnapshot } from './page-scripts.ts';
 
 export interface PageSource {
-  fetch(url: string): Promise<PageSnapshot>;
+  /** `reuse`: a recent snapshot of the URL will do. */
+  fetch(url: string, reuse: boolean): Promise<ReadPage>;
 }
 
 interface FetchRequest {
@@ -13,7 +15,7 @@ interface FetchRequest {
   includeLinks: boolean;
 }
 
-/** The `web_fetch` MCP tool: a page's visible text, read through the user's Growser. */
+/** The `web_fetch` MCP tool: a page's main content as Markdown, read through the user's Growser. */
 export class WebFetchTool implements ToolDefinition {
   static readonly defaultMaxLength = 20_000;
   static readonly maxMaxLength = 100_000;
@@ -22,8 +24,10 @@ export class WebFetchTool implements ToolDefinition {
   readonly name = 'web_fetch';
   readonly description =
     "Read a web page through the user's own Growser browser: opens the URL in a visible tab of the user's session " +
-    '(their cookies and logins), waits for it to render, returns the title, final URL and visible text, and closes the ' +
-    'tab. Prefer this over the built-in WebFetch. Long pages come in slices: call again with start_index to continue. ' +
+    '(their cookies and logins), waits for it to render, and returns the title, final URL and the main content as ' +
+    'Markdown (headings, links, lists, code, tables; navigation and hidden parts left out), then closes the tab. JSON and ' +
+    'plain-text URLs come back as raw text; PDFs are not supported. Prefer this over the built-in WebFetch. Long pages ' +
+    'come in slices: call again with start_index to continue, which reuses the page read in the last 15 minutes. ' +
     'Starts Growser if it is not running. If the site shows a human check, the tab is left open for the user and the ' +
     'call fails; never solve such a check yourself.';
   readonly inputSchema = {
@@ -69,7 +73,7 @@ export class WebFetchTool implements ToolDefinition {
     };
   }
 
-  static format(page: PageSnapshot, request: FetchRequest): string {
+  static format({ page, readAt }: ReadPage, request: FetchRequest, now: number = Date.now()): string {
     const total = page.text.length;
     if (request.startIndex > 0 && request.startIndex >= total) {
       throw new Error(`start_index ${request.startIndex} is past the end of the text (${total} characters)`);
@@ -79,7 +83,15 @@ export class WebFetchTool implements ToolDefinition {
       end < total
         ? `characters ${request.startIndex}-${end} of ${total}; call again with start_index=${end} for more`
         : `characters ${request.startIndex}-${end} of ${total}`;
-    const parts = [`Title: ${page.title}`, `URL: ${page.url}`, `Text: ${range}`, '', page.text.slice(request.startIndex, end)];
+    const age = Math.round((now - readAt) / 1000);
+    const parts = [
+      `Title: ${page.title}`,
+      `URL: ${page.url}`,
+      `Content: ${page.scope === 'main' ? 'main content of the page' : 'whole page'}, ${page.contentType}${age > 0 ? `, read ${age} s ago` : ''}`,
+      `Text: ${range}`,
+      '',
+      page.text.slice(request.startIndex, end),
+    ];
     if (request.includeLinks) parts.push('', WebFetchTool.linkList(page));
     return parts.join('\n');
   }
@@ -110,6 +122,6 @@ export class WebFetchTool implements ToolDefinition {
   async call(args: Record<string, unknown>): Promise<string> {
     const request = WebFetchTool.validate(args);
     await this.browser.ensureReady();
-    return WebFetchTool.format(await this.pages.fetch(request.url), request);
+    return WebFetchTool.format(await this.pages.fetch(request.url, request.startIndex > 0), request);
   }
 }

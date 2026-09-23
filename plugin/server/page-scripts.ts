@@ -82,9 +82,14 @@ export class PageScripts {
       return body.trim() ? `\n\n${body}\n\n` : '';
     };
     const inlineWrap = (marker: string, text: string): string => (text.trim() ? `${marker}${text.trim()}${marker}` : text);
-    // The rendered (flat) tree: an open shadow root replaces the host's children, a slot shows what is assigned to it.
+    // A closed shadow root is reachable only through chrome.dom, which content scripts have and pages do not.
+    const dom = (globalThis as { chrome?: { dom?: { openOrClosedShadowRoot?: (element: HTMLElement) => ShadowRoot | null } } }).chrome?.dom;
+    const shadowRootOf = (element: Element): ShadowRoot | null =>
+      element.shadowRoot ?? (dom?.openOrClosedShadowRoot && element instanceof HTMLElement ? dom.openOrClosedShadowRoot(element) : null);
+    // The rendered (flat) tree: a shadow root replaces the host's children, a slot shows what is assigned to it.
     const childrenOf = (element: Element): Node[] => {
-      if (element.shadowRoot) return [...element.shadowRoot.childNodes];
+      const shadowRoot = shadowRootOf(element);
+      if (shadowRoot) return [...shadowRoot.childNodes];
       if (element.tagName === 'SLOT') {
         const assigned = (element as HTMLSlotElement).assignedNodes({ flatten: true });
         if (assigned.length > 0) return assigned;

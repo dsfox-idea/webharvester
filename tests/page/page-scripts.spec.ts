@@ -120,6 +120,18 @@ test.describe('PageScripts.snapshot', () => {
     expect((await snapshot(page)).text).toContain('Article text.');
   });
 
+  test('reads closed shadow DOM through chrome.dom when the extension provides it', async ({ page }) => {
+    await page.setContent('<main><p>Light text.</p><div id="host"></div></main>');
+    await page.evaluate(() => {
+      const host = document.getElementById('host')!;
+      const shadow = host.attachShadow({ mode: 'closed' });
+      shadow.innerHTML = '<p>Closed shadow text.</p>';
+      const dom = { openOrClosedShadowRoot: (element: HTMLElement) => (element === host ? shadow : element.shadowRoot) };
+      Object.defineProperty(window, 'chrome', { value: { dom }, configurable: true });
+    });
+    expect((await snapshot(page)).text).toBe('Light text.\n\nClosed shadow text.');
+  });
+
   test('reads open shadow DOM content', async ({ page }) => {
     await page.setContent('<main><div id="host"></div></main>');
     await page.evaluate(() => {

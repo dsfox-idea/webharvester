@@ -109,7 +109,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   lack it (read from each process's environment block). Check a variable in
   the process that uses it, never in the Bash tool.
 - `innerText` leaves out shadow DOM content; walk the flat tree
-  (`shadowRoot`, `slot.assignedNodes`) to read web components.
+  (`shadowRoot`, `slot.assignedNodes`) to read web components. A closed
+  root is reachable only through `chrome.dom.openOrClosedShadowRoot`, which
+  `executeScript` code has (isolated world, `"dom"` feature context
+  `content_script`) and a page or Playwright's `page.evaluate` has not.
 - The built-in `WebFetch` cannot read PDFs (its model gets the raw bytes),
   so refusing PDFs in `web_fetch` is no regression.
 - On Windows `fs.existsSync` is false for a Microsoft Store app alias

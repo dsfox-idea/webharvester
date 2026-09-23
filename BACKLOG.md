@@ -29,3 +29,27 @@ passes):
 
 Before submitting: run `claude plugin validate ./plugin --strict`, and if the
 permission set was re-measured, `npm run build-guides` first.
+
+## Defects found in the 2026-09-23 project review (not fixed)
+
+- **Static test fails on Windows.** `tests/static/browser-facts.spec.ts:32`
+  matches `CatalogRepository.versionPath()` against `/catalog\/versions\/...$/`,
+  but `path.join` returns `\` separators on Windows. The code is right; the
+  assertion should accept either separator. All other 46 static tests pass.
+- **`setup.ps1` ignores native command failures.** `$ErrorActionPreference =
+  'Stop'` does not apply to external programs (PowerShell 7.6:
+  `$PSNativeCommandUseErrorActionPreference` is `False`). So
+  `try { claude plugin marketplace add } catch { ... update }` never reaches
+  `catch`, and in `-Measure` a failed `npm install` / `test:live` still runs
+  `mark-non-working`, `build-manifest` and `build-guides` on a stale or
+  missing report. `setup.sh` chains the same steps with `&&` and stops.
+- **Wrong Node minimum.** `setup.sh` and `setup.ps1` ask for "Node 20+", but
+  `node scripts/*.ts` needs built-in type stripping, on by default only since
+  Node 22.18 / 23.6. `package.json` has no `engines`.
+- **Broken install command in `plugin/README.md`.**
+  `claude plugin install web-harvester --marketplace <this-repo>`: the CLI has
+  no `--marketplace` option; the root README's
+  `claude plugin install web-harvester@webharvester` is the working form.
+- **`--load-extension` advice contradicts CLAUDE.md.** README ("Two ways to
+  use", "Install") offers `--load-extension=extension` for any Chromium
+  browser, while CLAUDE.md records that branded Chrome 137+ ignores it.

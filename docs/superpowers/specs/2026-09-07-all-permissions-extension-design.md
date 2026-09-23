@@ -81,15 +81,12 @@ platform / channel / manifest version / install location is removed from
 the granted set and reported as an install warning. The extension still
 loads. Unknown names produce a "malformed pattern" warning in MV3.
 
-Therefore the manifest declares all 95 names and the tests compute, per
-permission, an expected status for the environment the tests run in:
-
-- `available`
-- `platform` (e.g. ChromeOS-only)
-- `channel` (dev/beta/canary only)
-- `manifest-version` (MV2-only)
-- `location` (policy / component only)
-- `flag` (needs a command-line switch or feature flag)
+Therefore the full manifest (`build-manifest --full`) declares all 93
+catalog names and the tests compute, per permission, an expected status for
+the environment the tests run in: `available`, or an `UnavailableReason`
+from `src/availability.ts` (e.g. `platform` for ChromeOS-only, `channel`,
+`max-manifest-version` for MV2-only, `location` for policy-only,
+`command-line-switch`, `unknown-permission`).
 
 ## Components
 

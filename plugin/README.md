@@ -49,7 +49,9 @@ titles, URLs and snippets.
 Growser has to run with `--enable-webharvester --remote-debugging-port=9222`;
 when it is not running, the tool starts it with those flags. A human check from
 the engine is left open in the browser for the user and never answered by the
-tool. See the repository README for details.
+tool. While the plugin is enabled, a PreToolUse hook denies the built-in
+`WebSearch` and points sessions to `web_search`. See the repository README for
+details.
 
 ## Install
 

@@ -99,6 +99,9 @@ from another app, so keep the Growser window in view to watch.
   and then uses its `tabs` and `scripting` permissions.
 - If the engine shows a human check instead of results, the tab stays open and
   active for the user and the call fails. The tool never answers such a check.
+- Every session with the plugin is routed here: the server's MCP instructions
+  name `web_search`, and a PreToolUse hook (`plugin/hooks/`) denies the
+  built-in `WebSearch`. Disable the plugin to get `WebSearch` back.
 - Needs Node 22.18+ (it runs `plugin/server/main.ts` with built-in type
   stripping) and nothing else. `GROWSER_CDP_URL` overrides the endpoint,
   `GROWSER_PATH` the browser binary.

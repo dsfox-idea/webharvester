@@ -33,6 +33,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - `plugin/server/` (the `growser` MCP server, `web_search`) is hand-written and
   must stay dependency-free: Claude Code copies `plugin/` into its cache
   without `node_modules`. It must not import from `src/`.
+- Sessions are routed to `web_search` by the server's `instructions` (put into
+  every session's system prompt) and enforced by `plugin/hooks/` (PreToolUse
+  denies `WebSearch`); `tests/static/plugin-routing.spec.ts` guards both.
 - Any change under `plugin/` needs a version bump in both
   `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
   `claude plugin update` compares only `version` and otherwise keeps the old

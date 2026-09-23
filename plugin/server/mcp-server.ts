@@ -51,10 +51,13 @@ export class McpServer {
 
   private readonly info: ServerInfo;
   private readonly tools: Map<string, ToolDefinition>;
+  /** Claude Code puts these into the system prompt of every session that has the server. */
+  private readonly instructions: string | undefined;
 
-  constructor(info: ServerInfo, tools: readonly ToolDefinition[]) {
+  constructor(info: ServerInfo, tools: readonly ToolDefinition[], instructions?: string) {
     this.info = info;
     this.tools = new Map(tools.map((tool) => [tool.name, tool]));
+    this.instructions = instructions;
   }
 
   /** The tools subset is the same in every protocol revision, so the client's revision is accepted as is. */
@@ -102,6 +105,7 @@ export class McpServer {
           protocolVersion: McpServer.protocolVersion(params.protocolVersion),
           capabilities: { tools: { listChanged: false } },
           serverInfo: this.info,
+          ...(this.instructions === undefined ? {} : { instructions: this.instructions }),
         };
       case 'ping':
         return {};

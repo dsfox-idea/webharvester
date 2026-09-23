@@ -26,6 +26,12 @@ test.describe('McpServer.handle', () => {
     expect((fallback?.result as { protocolVersion: string }).protocolVersion).toBe(McpServer.fallbackProtocolVersion);
   });
 
+  test('initialize carries server instructions only when there are some', async () => {
+    const withInstructions = new McpServer({ name: 'test', version: '1' }, [echo], 'Use echo.');
+    expect((await withInstructions.handle(request(1, 'initialize')))?.result).toMatchObject({ instructions: 'Use echo.' });
+    expect((await server().handle(request(1, 'initialize')))?.result).not.toHaveProperty('instructions');
+  });
+
   test('notifications get no answer, ping gets an empty result', async () => {
     expect(await server().handle({ jsonrpc: '2.0', method: 'notifications/initialized' })).toBeUndefined();
     expect(await server().handle(request(3, 'ping'))).toEqual({ jsonrpc: '2.0', id: 3, result: {} });

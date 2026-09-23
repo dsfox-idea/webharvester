@@ -151,7 +151,7 @@ export class DuckDuckGoResults {
 }
 
 /**
- * Searches DuckDuckGo's no-JS page in a background tab of the user's Growser,
+ * Searches DuckDuckGo's no-JS page in a visible tab of the user's Growser,
  * the way the user would, and parses the rendered HTML here. A human check is
  * never answered by this code: the tab is left open and active for the user.
  */

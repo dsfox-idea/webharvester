@@ -14,7 +14,7 @@
       "name": "web-harvester",
       "source": "./plugin",
       "description": "Let Claude Code act autonomously on the live web through the user's own real, logged-in browser (Growser): screenshots, data between tabs, actions on the user's behalf, timed checks — carrying a task through end to end. Ships the web-discover capability reference.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "category": "reference",
       "author": {
         "name": "Dmitry Golubnichiy",

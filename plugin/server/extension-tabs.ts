@@ -21,12 +21,16 @@ export class ExtensionTabs {
     this.runner = runner;
   }
 
-  /** Runs in the extension worker: opens a background tab, waits for the load, returns the rendered HTML. */
+  /**
+   * Runs in the extension worker: opens the page as the active tab and brings its window to the front, so
+   * the user watches what the tool does; waits for the load and returns the rendered HTML.
+   */
   static loadExpression(url: string, timeoutMs: number): string {
     return `(async () => {
   let tab;
   try {
-    tab = await chrome.tabs.create({ url: ${JSON.stringify(url)}, active: false });
+    tab = await chrome.tabs.create({ url: ${JSON.stringify(url)}, active: true });
+    await chrome.windows.update(tab.windowId, { focused: true });
     const deadline = Date.now() + ${timeoutMs};
     while ((await chrome.tabs.get(tab.id)).status !== 'complete') {
       if (Date.now() > deadline) return { tabId: tab.id, error: 'page did not finish loading within ${timeoutMs} ms' };

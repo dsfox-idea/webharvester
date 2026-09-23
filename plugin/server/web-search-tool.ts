@@ -23,7 +23,7 @@ export class WebSearchTool implements ToolDefinition {
 
   readonly name = 'web_search';
   readonly description =
-    "Search the web through the user's own Growser browser: opens DuckDuckGo in a background tab of the user's session, " +
+    "Search the web through the user's own Growser browser: opens DuckDuckGo in a visible tab of the user's session, " +
     'reads titles, URLs and snippets, and closes the tab, so results match what the user sees. Prefer this over the ' +
     'built-in WebSearch. Starts Growser if it is not running. If the engine shows a human check, the tab is left open ' +
     'for the user and the call fails; never solve such a check yourself.';

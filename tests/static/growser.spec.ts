@@ -92,11 +92,12 @@ class FakeRunner implements ScriptRunner {
 }
 
 test.describe('ExtensionTabs', () => {
-  test('loads a page in a background tab and returns its html', async () => {
+  test('loads a page in a visible tab, brought to the front, and returns its html', async () => {
     const runner = new FakeRunner({ tabId: 3, url: 'https://x.example/?q=%22', html: '<html></html>' });
     expect(await new ExtensionTabs(runner).load('https://x.example/?q="')).toEqual({ tabId: 3, url: 'https://x.example/?q=%22', html: '<html></html>' });
     expect(runner.expressions[0]).toContain('url: "https://x.example/?q=\\""');
-    expect(runner.expressions[0]).toContain('active: false');
+    expect(runner.expressions[0]).toContain('active: true');
+    expect(runner.expressions[0]).toContain('chrome.windows.update(tab.windowId, { focused: true })');
   });
 
   test('closes the tab it opened when loading fails', async () => {

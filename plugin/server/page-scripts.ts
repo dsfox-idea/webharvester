@@ -115,7 +115,13 @@ export class PageScripts {
     // Code blocks stand in the text as placeholders until the whitespace cleanup is done, which must not touch them.
     const codeBlocks: string[] = [];
     const codePlaceholder = /\u0000(\d+)\u0000/g;
-    const fenceCode = (text: string): string => text.replace(codePlaceholder, (_, index: string) => `\`\`\`\n${codeBlocks[Number(index)]}\n\`\`\``);
+    // The fence must be longer than any backtick run in the code, or that run would close it.
+    const fenceCode = (text: string): string =>
+      text.replace(codePlaceholder, (_, index: string) => {
+        const code = codeBlocks[Number(index)];
+        const fence = '`'.repeat(Math.max(3, ...(code.match(/`{3,}/g) ?? []).map((run) => run.length + 1)));
+        return `${fence}\n${code}\n${fence}`;
+      });
 
     const convert = (node: Node, depth: number): string => {
       if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').replace(/\s+/g, ' ');

@@ -95,6 +95,11 @@ test.describe('PageScripts.snapshot', () => {
     expect(text).not.toContain('Copy');
   });
 
+  test('fences code that holds a fence with a longer one', async ({ page }) => {
+    await page.setContent('<main><pre>Markdown:\n```js\nx()\n```</pre></main>');
+    expect((await snapshot(page)).text).toBe('````\nMarkdown:\n```js\nx()\n```\n````');
+  });
+
   test('keeps code inside a quote quoted', async ({ page }) => {
     await page.setContent('<main><blockquote><p>Note</p><pre>if x:\n    y()</pre></blockquote></main>');
     expect((await snapshot(page)).text).toBe('> Note\n>\n> ```\n> if x:\n>     y()\n> ```');

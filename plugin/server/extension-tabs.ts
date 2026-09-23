@@ -94,11 +94,28 @@ export class ExtensionTabs {
     return this.runner.evaluate<T>(ExtensionTabs.readExpression(tabId, pageFunction, args));
   }
 
+  async html(tabId: number): Promise<string> {
+    return (await this.read<string | undefined>(tabId, PageScripts.outerHtml)) ?? '';
+  }
+
+  /** Waits until the tab has finished loading, e.g. after the user completed a check that navigates. */
+  async waitForLoad(tabId: number, timeoutMs = 20_000): Promise<void> {
+    const loaded = await this.runner.evaluate<boolean>(`(async () => {
+  const deadline = Date.now() + ${timeoutMs};
+  while ((await chrome.tabs.get(${tabId})).status !== 'complete') {
+    if (Date.now() > deadline) return false;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return true;
+})()`);
+    if (!loaded) throw new Error(`The Growser tab did not finish loading within ${timeoutMs} ms`);
+  }
+
   /** Opens the page and returns its rendered HTML; the tab stays open for the caller to close or reveal. */
   async load(url: string, timeoutMs = 20_000): Promise<LoadedPage> {
     const tab = await this.open(url, timeoutMs);
     try {
-      return { ...tab, html: (await this.read<string | undefined>(tab.tabId, PageScripts.outerHtml)) ?? '' };
+      return { ...tab, html: await this.html(tab.tabId) };
     } catch (error) {
       await this.close(tab).catch(() => undefined);
       throw new Error(`Could not read ${url} in a Growser tab: ${error instanceof Error ? error.message : String(error)}`);

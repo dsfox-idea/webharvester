@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import type { BrowserGate } from '../../plugin/server/growser.ts';
 import type { ReadPage } from '../../plugin/server/page-fetcher.ts';
 import type { PageSnapshot } from '../../plugin/server/page-scripts.ts';
+import type { AskUser } from '../../plugin/server/mcp-server.ts';
+import type { DigestAnswer, PageDigest } from '../../plugin/server/page-digest.ts';
 import { WebFetchTool, type PageSource } from '../../plugin/server/web-fetch-tool.ts';
 
 const page: PageSnapshot = {
@@ -18,7 +20,7 @@ const page: PageSnapshot = {
   challengeFrame: false,
 };
 
-class Recorder implements BrowserGate, PageSource {
+class Recorder implements BrowserGate, PageSource, PageDigest {
   readonly calls: string[] = [];
   private readonly readAt: number;
 
@@ -31,13 +33,22 @@ class Recorder implements BrowserGate, PageSource {
     return 'Chrome/153';
   }
 
-  async fetch(url: string, reuse: boolean): Promise<ReadPage> {
-    this.calls.push(`fetch ${url}${reuse ? ' reuse' : ''}`);
+  async fetch(url: string, reuse: boolean, askUser: AskUser): Promise<ReadPage> {
+    this.calls.push(`fetch ${url}${reuse ? ' reuse' : ''}${askUser === askNobody ? '' : ' with another askUser'}`);
     return { page, readAt: this.readAt };
+  }
+
+  async answer(prompt: string, read: PageSnapshot): Promise<DigestAnswer> {
+    this.calls.push(`digest ${prompt} over ${read.text.length} chars`);
+    return { text: 'The answer.', model: 'claude-haiku-test' };
   }
 }
 
-const call = (args: Record<string, unknown>, recorder = new Recorder()) => ({ recorder, result: new WebFetchTool(recorder, recorder).call(args) });
+const askNobody: AskUser = async () => 'unavailable';
+const call = (args: Record<string, unknown>, recorder = new Recorder()) => ({
+  recorder,
+  result: new WebFetchTool(recorder, recorder, recorder).call(args, { askUser: askNobody }),
+});
 
 test.describe('WebFetchTool', () => {
   test('accepts only absolute http and https URLs, before touching the browser', async () => {
@@ -56,6 +67,9 @@ test.describe('WebFetchTool', () => {
       [{ start_index: -1 }, /start_index must be an integer/],
       [{ start_index: '3' }, /start_index/],
       [{ include_links: 'yes' }, /include_links must be true or false/],
+      [{ prompt: '  ' }, /prompt must be a non-empty string/],
+      [{ prompt: 42 }, /prompt must be a non-empty string/],
+      [{ prompt: 'x'.repeat(5001) }, /prompt is longer than 5000 characters/],
     ] as const) {
       await expect(call({ url: 'https://docs.example/', ...args }).result, JSON.stringify(args)).rejects.toThrow(message);
     }
@@ -83,5 +97,14 @@ test.describe('WebFetchTool', () => {
     expect(await call({ url: 'https://docs.example/', include_links: true }).result).toMatch(
       /\n\nLinks: 2\n1\. One - https:\/\/docs\.example\/1\n2\. \(no text\) - https:\/\/docs\.example\/2$/,
     );
+  });
+
+  test("with a prompt, reads the page fresh and returns only the small model's answer", async () => {
+    const { recorder, result } = call({ url: 'https://docs.example/', prompt: '  What is it?  ', start_index: 3, max_length: 2 });
+    expect(await result).toBe(
+      'Title: Docs\nURL: https://docs.example/final\nContent: main content of the page, text/html\n' +
+        'Answer: by claude-haiku-test from 10 characters of the page\n\nThe answer.',
+    );
+    expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/', 'digest What is it? over 10 chars']);
   });
 });

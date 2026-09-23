@@ -47,7 +47,10 @@ dependencies, Node 22.18+). Its `web_search` tool searches DuckDuckGo in a
 visible, active tab of the user's Growser (so the user can watch) and returns
 titles, URLs and snippets, with `allowed_domains` / `blocked_domains` like the
 built-in `WebSearch`; `web_fetch` reads a page the same way, with the user's
-session, and returns its main content as Markdown in slices.
+session, and returns its main content as Markdown in slices, or with `prompt`
+only Claude Haiku's answer about it (as the built-in `WebFetch` does). A human
+check is handed to the user through a Claude Code question, and the page is
+read once the user has completed it in Growser.
 Growser has to run with `--enable-webharvester --remote-debugging-port=9222`;
 when it is not running, the tool starts it with those flags. A human check from
 the engine is left open in the browser for the user and never answered by the

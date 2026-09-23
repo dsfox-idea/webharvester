@@ -13,13 +13,13 @@ const article: PageSnapshot = {
   challengeFrame: false,
 };
 
-/** Records the calls and serves one snapshot, or fails the read. */
+/** Records the calls; serves the given snapshots in turn (the last one repeats), or fails the read. */
 class FakeTabs implements ReadableTabs {
   readonly calls: string[] = [];
-  private readonly page: PageSnapshot | Error;
+  private readonly pages: Array<PageSnapshot | Error>;
 
-  constructor(page: PageSnapshot | Error) {
-    this.page = page;
+  constructor(...pages: Array<PageSnapshot | Error>) {
+    this.pages = pages;
   }
 
   async open(url: string): Promise<OpenTab> {
@@ -29,8 +29,13 @@ class FakeTabs implements ReadableTabs {
 
   async read<T>(tabId: number, pageFunction: string, args: readonly unknown[] = []): Promise<T> {
     this.calls.push(`read ${tabId} ${pageFunction === PageScripts.snapshot ? 'snapshot' : 'other'} ${JSON.stringify(args)}`);
-    if (this.page instanceof Error) throw this.page;
-    return this.page as T;
+    const page = this.pages.length > 1 ? this.pages.shift()! : this.pages[0];
+    if (page instanceof Error) throw page;
+    return page as T;
+  }
+
+  async waitForLoad(tabId: number): Promise<void> {
+    this.calls.push(`wait ${tabId}`);
   }
 
   async close(tab: TabHandle): Promise<void> {
@@ -96,6 +101,13 @@ test.describe('PageFetcher', () => {
     await expect(new PageFetcher(tabs).fetch('https://news.example/a')).rejects.toThrow(/human check.*Do not try to solve it.*web_fetch again/);
     expect(tabs.calls.at(-1)).toBe('reveal 9');
     expect(tabs.calls.some((call) => call.startsWith('close'))).toBe(false);
+  });
+
+  test('reads the same tab again once the user has completed a human check', async () => {
+    const tabs = new FakeTabs({ ...article, title: 'Just a moment...', text: 'Verify you are human' }, article);
+    const read = await new PageFetcher(tabs, new Clock().now).fetch('https://news.example/a', false, async () => 'accepted');
+    expect(read.page).toEqual(article);
+    expect(tabs.calls).toEqual(['open https://news.example/a', 'read 9 snapshot [5000]', 'reveal 9', 'wait 9', 'read 9 snapshot [5000]', 'close 9 back to 2']);
   });
 
   test('closes the tab when the page cannot be read', async () => {

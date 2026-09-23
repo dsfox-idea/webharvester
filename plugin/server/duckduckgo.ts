@@ -1,5 +1,7 @@
 import type { LoadedPage, TabHandle } from './extension-tabs.ts';
+import { HumanCheckGate } from './human-check-gate.ts';
 import { log } from './log.ts';
+import type { AskUser } from './mcp-server.ts';
 
 export interface SearchResult {
   title: string;
@@ -12,9 +14,11 @@ export interface SearchOutcome {
   results: SearchResult[];
 }
 
-/** What the search needs from the browser: load a page in a tab, then close it or hand it to the user. */
+/** What the search needs from the browser: load a page in a tab, read it again, close it or hand it to the user. */
 export interface PageTabs {
   load(url: string): Promise<LoadedPage>;
+  html(tabId: number): Promise<string>;
+  waitForLoad(tabId: number): Promise<void>;
   close(tab: TabHandle): Promise<void>;
   reveal(tabId: number): Promise<void>;
 }
@@ -153,7 +157,7 @@ export class DuckDuckGoResults {
 /**
  * Searches DuckDuckGo's no-JS page in a visible tab of the user's Growser,
  * the way the user would, and parses the rendered HTML here. A human check is
- * never answered by this code: the tab is left open and active for the user.
+ * never answered by this code: HumanCheckGate hands it to the user.
  */
 export class DuckDuckGoSearch {
   static readonly endpoint = 'https://html.duckduckgo.com/html/';
@@ -168,20 +172,20 @@ export class DuckDuckGoSearch {
     return `${DuckDuckGoSearch.endpoint}?q=${encodeURIComponent(query)}`;
   }
 
-  async search(query: string, limit: number): Promise<SearchOutcome> {
+  async search(query: string, limit: number, askUser: AskUser = HumanCheckGate.cannotAsk): Promise<SearchOutcome> {
     const url = DuckDuckGoSearch.url(query);
     const page = await this.tabs.load(url);
-    if (DuckDuckGoResults.isChallenge(page.html)) {
-      await this.tabs.reveal(page.tabId);
-      log(`ddg ${JSON.stringify(query)}: human check, tab ${page.tabId} left open for the user`);
-      throw new Error(
-        'DuckDuckGo answered with a human check (CAPTCHA) instead of results. It is open in the active Growser tab. ' +
-          'Do not try to solve it: ask the user to complete it there, then run web_search again.',
-      );
-    }
+    const html = await new HumanCheckGate(this.tabs, askUser).pass(
+      page,
+      'DuckDuckGo',
+      page.html,
+      DuckDuckGoResults.isChallenge,
+      () => this.tabs.html(page.tabId),
+      'web_search',
+    );
     await this.tabs.close(page);
-    const results = DuckDuckGoResults.parse(page.html, limit);
-    log(`ddg ${JSON.stringify(query)}: ${page.html.length} chars, ${results.length} results`);
+    const results = DuckDuckGoResults.parse(html, limit);
+    log(`ddg ${JSON.stringify(query)}: ${html.length} chars, ${results.length} results`);
     return { url, results };
   }
 }

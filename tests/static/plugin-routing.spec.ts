@@ -35,7 +35,7 @@ test.describe('routing the web through Growser', () => {
     expect(instructions).toContain(searchTool);
     expect(instructions).toContain(fetchTool);
     expect(instructions).toMatch(/WebSearch and WebFetch are blocked/);
-    expect(instructions).toMatch(/never solve it yourself/);
+    expect(instructions).toMatch(/never solve it yourself/i);
   });
 
   test('the hook denies each built-in tool and names its replacement', () => {

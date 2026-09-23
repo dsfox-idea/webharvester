@@ -95,7 +95,11 @@ parts left out, shadow DOM included). JSON and plain text come back raw; PDFs
 are refused (the built-in `WebFetch` cannot read them either). Text comes in
 slices (`max_length`, `start_index`, optional `include_links`); a continuation
 reuses the snapshot read in the last 15 minutes, a fresh read always opens the
-page.
+page. With `prompt`, like the built-in `WebFetch`, the page goes to Claude
+Haiku (the model `WebFetch` uses) and only the answer comes back: the server
+runs `claude -p --safe-mode --model haiku --tools ""` with the user's own
+Claude Code sign-in (Claude Code offers no MCP sampling), so no API key is
+needed; the CLI is found through `CLAUDE_CLI_PATH` or `CLAUDE_CODE_EXECPATH`.
 
 `web_search` takes `allowed_domains` / `blocked_domains` (sent as `site:`
 operators and checked again on every result) and returns up to 10 results. It
@@ -111,8 +115,11 @@ from another app, so keep the Growser window in view to watch.
 - The bundled extension's MV3 service worker sleeps after ~30 s idle; the
   server wakes it through the DevTools protocol (`ServiceWorker.startWorker`)
   and then uses its `tabs` and `scripting` permissions.
-- If the engine shows a human check instead of results, the tab stays open and
-  active for the user and the call fails. The tool never answers such a check.
+- If a site shows a human check (CAPTCHA) instead of the page, the tab is made
+  active and Claude Code asks the user (MCP elicitation) to complete it in
+  Growser; after the confirmation the same tab is read again. Declining closes
+  the tab. Where nobody can be asked (headless `claude -p`), the tab stays open
+  and the call fails with that request. The tools never answer a check.
 - Every session with the plugin is routed here: the server's MCP instructions
   name both tools, and a PreToolUse hook (`plugin/hooks/`) denies the built-in
   `WebSearch` and `WebFetch`. Disable the plugin to get them back.

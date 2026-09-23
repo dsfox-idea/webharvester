@@ -88,6 +88,16 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
 - A diagnostic `evaluate` that outlives the CDP call timeout (30 s) keeps
   running in the worker and can leave tabs open: keep diagnostics short and
   check the tab strip afterwards.
+- Claude Code 2.1.280 declares only `roots` and `elicitation` to MCP servers:
+  `sampling/createMessage` is "Method not found", and a headless `claude -p`
+  answers `elicitation/create` at once with `cancel`.
+- The built-in `WebFetch` summarises with `claude-haiku-4-5`. `claude -p
+  --safe-mode --model haiku --tools "" --system-prompt ...` gives the same
+  model with the user's sign-in and about 6x fewer tokens than the default
+  prompt; `--bare` would need `ANTHROPIC_API_KEY`.
+- On Windows `claude` on PATH is an npm `.cmd` shim that `spawn` cannot run
+  without a shell; Claude Code passes its binary to children (MCP servers
+  included) as `CLAUDE_CODE_EXECPATH`.
 - `innerText` leaves out shadow DOM content; walk the flat tree
   (`shadowRoot`, `slot.assignedNodes`) to read web components.
 - The built-in `WebFetch` cannot read PDFs (its model gets the raw bytes),

@@ -1,11 +1,12 @@
 import type { BrowserGate } from './growser.ts';
-import type { ToolDefinition } from './mcp-server.ts';
+import type { AskUser, ToolContext, ToolDefinition } from './mcp-server.ts';
+import type { PageDigest } from './page-digest.ts';
 import type { ReadPage } from './page-fetcher.ts';
 import type { PageLink, PageSnapshot } from './page-scripts.ts';
 
 export interface PageSource {
-  /** `reuse`: a recent snapshot of the URL will do. */
-  fetch(url: string, reuse: boolean): Promise<ReadPage>;
+  /** `reuse`: a recent snapshot of the URL will do; `askUser` hands a human check to the user. */
+  fetch(url: string, reuse: boolean, askUser: AskUser): Promise<ReadPage>;
 }
 
 interface FetchRequest {
@@ -13,27 +14,36 @@ interface FetchRequest {
   maxLength: number;
   startIndex: number;
   includeLinks: boolean;
+  prompt: string | undefined;
 }
 
-/** The `web_fetch` MCP tool: a page's main content as Markdown, read through the user's Growser. */
+/** The `web_fetch` MCP tool: a page's main content as Markdown, or an answer about it, read through the user's Growser. */
 export class WebFetchTool implements ToolDefinition {
   static readonly defaultMaxLength = 20_000;
   static readonly maxMaxLength = 100_000;
+  static readonly maxPromptLength = 5_000;
   static readonly maxLinks = 300;
 
   readonly name = 'web_fetch';
   readonly description =
     "Read a web page through the user's own Growser browser: opens the URL in a visible tab of the user's session " +
     '(their cookies and logins), waits for it to render, and returns the title, final URL and the main content as ' +
-    'Markdown (headings, links, lists, code, tables; navigation and hidden parts left out), then closes the tab. JSON and ' +
-    'plain-text URLs come back as raw text; PDFs are not supported. Prefer this over the built-in WebFetch. Long pages ' +
-    'come in slices: call again with start_index to continue, which reuses the page read in the last 15 minutes. ' +
-    'Starts Growser if it is not running. If the site shows a human check, the tab is left open for the user and the ' +
-    'call fails; never solve such a check yourself.';
+    'Markdown (headings, links, lists, code, tables; navigation and hidden parts left out), then closes the tab. With ' +
+    '`prompt`, like the built-in WebFetch, the page goes to Claude Haiku and only its answer comes back (saves context, ' +
+    'takes a few seconds more). JSON and plain-text URLs come back as raw text; PDFs are not supported. Prefer this ' +
+    'over the built-in WebFetch. Long pages come in slices: call again with start_index to continue, which reuses the ' +
+    'page read in the last 15 minutes. Starts Growser if it is not running. If the site shows a human check, the user ' +
+    'is asked to complete it in Growser and the page is read afterwards; never solve such a check yourself.';
   readonly inputSchema = {
     type: 'object',
     properties: {
       url: { type: 'string', description: 'http or https URL of the page.' },
+      prompt: {
+        type: 'string',
+        description:
+          'Optional question or instruction about the page. The page (up to 200,000 characters) goes to Claude Haiku and ' +
+          'only its answer is returned; max_length and start_index are then ignored.',
+      },
       max_length: {
         type: 'integer',
         minimum: 1,
@@ -50,10 +60,12 @@ export class WebFetchTool implements ToolDefinition {
 
   private readonly browser: BrowserGate;
   private readonly pages: PageSource;
+  private readonly digest: PageDigest;
 
-  constructor(browser: BrowserGate, pages: PageSource) {
+  constructor(browser: BrowserGate, pages: PageSource, digest: PageDigest) {
     this.browser = browser;
     this.pages = pages;
+    this.digest = digest;
   }
 
   static validate(args: Record<string, unknown>): FetchRequest {
@@ -70,6 +82,7 @@ export class WebFetchTool implements ToolDefinition {
       maxLength: WebFetchTool.integer(args.max_length, 'max_length', WebFetchTool.defaultMaxLength, 1, WebFetchTool.maxMaxLength),
       startIndex: WebFetchTool.integer(args.start_index, 'start_index', 0, 0, Number.MAX_SAFE_INTEGER),
       includeLinks: WebFetchTool.flag(args.include_links, 'include_links'),
+      prompt: WebFetchTool.prompt(args.prompt),
     };
   }
 
@@ -83,17 +96,24 @@ export class WebFetchTool implements ToolDefinition {
       end < total
         ? `characters ${request.startIndex}-${end} of ${total}; call again with start_index=${end} for more`
         : `characters ${request.startIndex}-${end} of ${total}`;
+    const parts = [...WebFetchTool.header(page, readAt, now), `Text: ${range}`, '', page.text.slice(request.startIndex, end)];
+    if (request.includeLinks) parts.push('', WebFetchTool.linkList(page));
+    return parts.join('\n');
+  }
+
+  static formatAnswer({ page, readAt }: ReadPage, request: FetchRequest, answer: { text: string; model: string }, now: number = Date.now()): string {
+    const parts = [...WebFetchTool.header(page, readAt, now), `Answer: by ${answer.model} from ${page.text.length} characters of the page`, '', answer.text];
+    if (request.includeLinks) parts.push('', WebFetchTool.linkList(page));
+    return parts.join('\n');
+  }
+
+  private static header(page: PageSnapshot, readAt: number, now: number): string[] {
     const age = Math.round((now - readAt) / 1000);
-    const parts = [
+    return [
       `Title: ${page.title}`,
       `URL: ${page.url}`,
       `Content: ${page.scope === 'main' ? 'main content of the page' : 'whole page'}, ${page.contentType}${age > 0 ? `, read ${age} s ago` : ''}`,
-      `Text: ${range}`,
-      '',
-      page.text.slice(request.startIndex, end),
     ];
-    if (request.includeLinks) parts.push('', WebFetchTool.linkList(page));
-    return parts.join('\n');
   }
 
   private static linkList(page: PageSnapshot): string {
@@ -119,9 +139,19 @@ export class WebFetchTool implements ToolDefinition {
     return value;
   }
 
-  async call(args: Record<string, unknown>): Promise<string> {
+  private static prompt(value: unknown): string | undefined {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value !== 'string' || value.trim() === '') throw new Error('prompt must be a non-empty string');
+    if (value.length > WebFetchTool.maxPromptLength) throw new Error(`prompt is longer than ${WebFetchTool.maxPromptLength} characters`);
+    return value.trim();
+  }
+
+  async call(args: Record<string, unknown>, context: ToolContext): Promise<string> {
     const request = WebFetchTool.validate(args);
     await this.browser.ensureReady();
-    return WebFetchTool.format(await this.pages.fetch(request.url, request.startIndex > 0), request);
+    const read = await this.pages.fetch(request.url, request.startIndex > 0 && request.prompt === undefined, context.askUser);
+    if (request.prompt === undefined) return WebFetchTool.format(read, request);
+    const shownAt = Date.now(); // the page's age is not the time the model took
+    return WebFetchTool.formatAnswer(read, request, await this.digest.answer(request.prompt, read.page), shownAt);
   }
 }

@@ -7,18 +7,27 @@ const fixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, im
 const resultsPage = fixture('ddg-results.html');
 const challengePage = fixture('ddg-challenge.html');
 
-/** Records what the search asks of the browser and serves a fixed page. */
+/** Records what the search asks of the browser; serves the given pages in turn (the last one repeats). */
 class FakeTabs implements PageTabs {
   readonly calls: string[] = [];
-  private readonly html: string;
+  private readonly pages: string[];
 
-  constructor(html: string) {
-    this.html = html;
+  constructor(...pages: string[]) {
+    this.pages = pages;
   }
 
   async load(url: string): Promise<LoadedPage> {
     this.calls.push(`load ${url}`);
-    return { tabId: 7, previousTabId: 2, url, html: this.html };
+    return { tabId: 7, previousTabId: 2, url, html: this.next() };
+  }
+
+  async html(tabId: number): Promise<string> {
+    this.calls.push(`html ${tabId}`);
+    return this.next();
+  }
+
+  async waitForLoad(tabId: number): Promise<void> {
+    this.calls.push(`wait ${tabId}`);
   }
 
   async close(tab: TabHandle): Promise<void> {
@@ -27,6 +36,10 @@ class FakeTabs implements PageTabs {
 
   async reveal(tabId: number): Promise<void> {
     this.calls.push(`reveal ${tabId}`);
+  }
+
+  private next(): string {
+    return this.pages.length > 1 ? this.pages.shift()! : this.pages[0];
   }
 }
 
@@ -126,9 +139,21 @@ test.describe('DuckDuckGoSearch', () => {
     expect(tabs.calls).toEqual([`load ${url}`, 'close 7 back to 2']);
   });
 
-  test('on a human check leaves the tab open and active and fails without parsing', async () => {
+  test('without a way to ask, a human check leaves the tab open and active and fails without parsing', async () => {
     const tabs = new FakeTabs(challengePage);
-    await expect(new DuckDuckGoSearch(tabs).search('q', 5)).rejects.toThrow(/human check.*Do not try to solve it/);
+    await expect(new DuckDuckGoSearch(tabs).search('q', 5)).rejects.toThrow(/human check.*Do not try to solve it.*web_search again/);
     expect(tabs.calls).toEqual([`load ${DuckDuckGoSearch.url('q')}`, 'reveal 7']);
+  });
+
+  test('after the user completes the check, reads the same tab again and returns the results', async () => {
+    const tabs = new FakeTabs(challengePage, resultsPage);
+    const asked: string[] = [];
+    const outcome = await new DuckDuckGoSearch(tabs).search('q', 3, async (message) => {
+      asked.push(message);
+      return 'accepted';
+    });
+    expect(outcome.results).toEqual(DuckDuckGoResults.parse(resultsPage, 3));
+    expect(asked).toEqual([expect.stringMatching(/^DuckDuckGo shows a human check .* Complete it there yourself/)]);
+    expect(tabs.calls).toEqual([`load ${DuckDuckGoSearch.url('q')}`, 'reveal 7', 'wait 7', 'html 7', 'close 7 back to 2']);
   });
 });

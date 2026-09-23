@@ -84,3 +84,65 @@ test.describe('McpServer.serve', () => {
     expect(replies).toContainEqual({ jsonrpc: '2.0', id: 2, result: { content: [{ type: 'text', text: 'echo: кириллица' }] } });
   });
 });
+
+test.describe('McpServer elicitation', () => {
+  /** A server whose tool asks the user once and returns the answer, wired to in-memory streams. */
+  const session = (capabilities: Record<string, unknown>) => {
+    const asker: ToolDefinition = {
+      name: 'ask',
+      description: 'Asks the user.',
+      inputSchema: { type: 'object' },
+      call: async (_args, context) => context.askUser('Complete the check, then confirm.'),
+    };
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const sent: Array<Record<string, unknown>> = [];
+    let buffered = '';
+    output.on('data', (chunk: Buffer) => {
+      buffered += chunk.toString('utf8');
+      const lines = buffered.split('\n');
+      buffered = lines.pop() ?? '';
+      sent.push(...lines.map((line) => JSON.parse(line) as Record<string, unknown>));
+    });
+    const served = new McpServer({ name: 'test', version: '1' }, [asker]).serve(input, output);
+    const write = (message: unknown) => input.write(`${JSON.stringify(message)}\n`);
+    write(request(1, 'initialize', { protocolVersion: '2025-06-18', capabilities }));
+    write(request(2, 'tools/call', { name: 'ask', arguments: {} }));
+    return { sent, write, done: async () => (input.end(), served) };
+  };
+  const toolAnswer = (sent: Array<Record<string, unknown>>) =>
+    (sent.find((message) => message.id === 2)?.result as { content: Array<{ text: string }> } | undefined)?.content[0].text;
+
+  for (const [reply, expected] of [
+    [{ action: 'accept', content: { done: true } }, 'accepted'],
+    [{ action: 'accept', content: { done: false } }, 'declined'],
+    [{ action: 'decline' }, 'declined'],
+    [{ action: 'cancel' }, 'unavailable'],
+  ] as const) {
+    test(`maps the client's ${JSON.stringify(reply)} to ${expected}`, async () => {
+      const { sent, write, done } = session({ elicitation: {} });
+      await expect.poll(() => sent.find((message) => message.method === 'elicitation/create')).toBeTruthy();
+      const asked = sent.find((message) => message.method === 'elicitation/create')!;
+      expect(asked.params).toEqual({ message: 'Complete the check, then confirm.', requestedSchema: McpServer.confirmationSchema });
+      write({ jsonrpc: '2.0', id: asked.id, result: reply });
+      await expect.poll(() => toolAnswer(sent)).toBe(expected);
+      expect(sent.some((message) => message.error)).toBe(false);
+      await done();
+    });
+  }
+
+  test('an error from the client counts as unavailable', async () => {
+    const { sent, write, done } = session({ elicitation: {} });
+    await expect.poll(() => sent.find((message) => message.method === 'elicitation/create')).toBeTruthy();
+    write({ jsonrpc: '2.0', id: sent.find((message) => message.method === 'elicitation/create')!.id, error: { code: -32601, message: 'Method not found' } });
+    await expect.poll(() => toolAnswer(sent)).toBe('unavailable');
+    await done();
+  });
+
+  test('never asks a client that did not declare elicitation', async () => {
+    const { sent, done } = session({ roots: {} });
+    await expect.poll(() => toolAnswer(sent)).toBe('unavailable');
+    expect(sent.some((message) => message.method === 'elicitation/create')).toBe(false);
+    await done();
+  });
+});

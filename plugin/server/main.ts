@@ -5,6 +5,7 @@ import { ExtensionWorker } from './extension-worker.ts';
 import { GrowserEndpoint, GrowserLauncher } from './growser.ts';
 import { log } from './log.ts';
 import { McpServer } from './mcp-server.ts';
+import { ClaudeCliDigest } from './page-digest.ts';
 import { PageFetcher } from './page-fetcher.ts';
 import { WebFetchTool } from './web-fetch-tool.ts';
 import { WebSearchTool } from './web-search-tool.ts';
@@ -14,8 +15,9 @@ const instructions =
   '(mcp__plugin_web-harvester_growser__web_search), and to read a page call its web_fetch tool ' +
   '(mcp__plugin_web-harvester_growser__web_fetch); load their schemas with ToolSearch if they are deferred. The built-in ' +
   'WebSearch and WebFetch are blocked by the web-harvester plugin. If a tool fails, report the error to the user instead ' +
-  'of looking for another route. If it reports a human check (CAPTCHA), ask the user to complete it in Growser and ' +
-  'wait; never solve it yourself.';
+  'of looking for another route. A human check (CAPTCHA) is the user\'s to complete in Growser: the tools ask the user ' +
+  'themselves when Claude Code can show the question; if a tool reports one instead, ask the user and wait. Never ' +
+  'solve it yourself.';
 
 const plugin = JSON.parse(readFileSync(new URL('../.claude-plugin/plugin.json', import.meta.url), 'utf8')) as { version: string };
 const endpoint = GrowserEndpoint.fromEnv(process.env);
@@ -23,7 +25,7 @@ const launcher = new GrowserLauncher(endpoint);
 const tabs = new ExtensionTabs(new ExtensionWorker(endpoint));
 const server = new McpServer(
   { name: 'growser', version: plugin.version },
-  [new WebSearchTool(launcher, new DuckDuckGoSearch(tabs)), new WebFetchTool(launcher, new PageFetcher(tabs))],
+  [new WebSearchTool(launcher, new DuckDuckGoSearch(tabs)), new WebFetchTool(launcher, new PageFetcher(tabs), new ClaudeCliDigest())],
   instructions,
 );
 

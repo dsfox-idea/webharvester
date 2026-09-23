@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { dirname, join, win32 } from 'node:path';
 import { log } from './log.ts';
 import type { PageSnapshot } from './page-scripts.ts';
 
@@ -33,14 +35,40 @@ export class ClaudeCliDigest implements PageDigest {
   private readonly command: string;
   private readonly prefixArgs: readonly string[];
 
-  /**
-   * `command` / `prefixArgs` point at the Claude Code CLI: CLAUDE_CLI_PATH, else the binary of the Claude Code
-   * that started this server (CLAUDE_CODE_EXECPATH; on Windows `claude` on PATH is often an npm .cmd shim that
-   * cannot be spawned without a shell), else `claude`.
-   */
-  constructor(command: string = process.env.CLAUDE_CLI_PATH || process.env.CLAUDE_CODE_EXECPATH || 'claude', prefixArgs: readonly string[] = []) {
+  /** `command` / `prefixArgs` point at the Claude Code CLI (see `locateCli`). */
+  constructor(command: string = ClaudeCliDigest.locateCli(), prefixArgs: readonly string[] = []) {
     this.command = command;
     this.prefixArgs = prefixArgs;
+  }
+
+  /**
+   * CLAUDE_CLI_PATH, else `claude` on PATH. Claude Code tells its MCP servers nothing about its own binary
+   * (CLAUDE_CODE_EXECPATH reaches only its Bash tool). On Windows `spawn` without a shell runs `claude.exe` but
+   * not the `claude.cmd` shim an npm install puts on PATH, so the binary that shim starts is used instead.
+   */
+  static locateCli(env: NodeJS.ProcessEnv = process.env, platform: NodeJS.Platform = process.platform): string {
+    if (env.CLAUDE_CLI_PATH) return env.CLAUDE_CLI_PATH;
+    if (platform !== 'win32') return 'claude';
+    for (const directory of (env.PATH ?? '').split(win32.delimiter).filter(Boolean)) {
+      const binary = join(directory, 'claude.exe');
+      if (existsSync(binary)) return binary;
+      const shimTarget = ClaudeCliDigest.shimTarget(join(directory, 'claude.cmd'));
+      if (shimTarget) return shimTarget;
+    }
+    return 'claude';
+  }
+
+  /** The .exe an npm cmd-shim runs: `"%dp0%\node_modules\...\claude.exe" %*`, relative to the shim. */
+  private static shimTarget(shim: string): string | undefined {
+    let script: string;
+    try {
+      script = readFileSync(shim, 'utf8');
+    } catch {
+      return undefined;
+    }
+    const relative = /"%dp0%\\([^"]+\.exe)"/i.exec(script)?.[1];
+    const target = relative && join(dirname(shim), ...relative.split('\\'));
+    return target && existsSync(target) ? target : undefined;
   }
 
   static arguments(prompt: string): string[] {

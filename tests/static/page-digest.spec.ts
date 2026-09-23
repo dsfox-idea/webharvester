@@ -1,4 +1,5 @@
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { ClaudeCliDigest } from '../../plugin/server/page-digest.ts';
 import type { PageSnapshot } from '../../plugin/server/page-scripts.ts';
@@ -55,5 +56,27 @@ test.describe('ClaudeCliDigest', () => {
     await expect(new ClaudeCliDigest(process.execPath, [script, 'error']).answer('q', page)).rejects.toThrow(/haiku could not answer: Credit balance is too low/);
     await expect(new ClaudeCliDigest(process.execPath, [script, 'crash']).answer('q', page)).rejects.toThrow(/haiku could not answer: exit 3, boom on stderr/);
     await expect(new ClaudeCliDigest('definitely-not-a-claude-cli').answer('q', page)).rejects.toThrow(/Could not start the Claude Code CLI .*set CLAUDE_CLI_PATH/);
+  });
+
+  test('finds the CLI: CLAUDE_CLI_PATH, then claude.exe or the binary behind an npm shim on the Windows PATH', async ({}, testInfo) => {
+    const empty = testInfo.outputPath('empty');
+    const npm = testInfo.outputPath('npm');
+    const native = testInfo.outputPath('native');
+    const broken = testInfo.outputPath('broken');
+    const npmBinary = join(npm, 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.exe');
+    for (const directory of [empty, dirname(npmBinary), native, broken]) mkdirSync(directory, { recursive: true });
+    const shim = '@ECHO off\r\n"%dp0%\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.exe"   %*\r\n';
+    writeFileSync(join(npm, 'claude.cmd'), shim);
+    writeFileSync(join(broken, 'claude.cmd'), shim.replace('claude-code', 'gone'));
+    writeFileSync(npmBinary, '');
+    writeFileSync(join(native, 'claude.exe'), '');
+    const path = (...directories: string[]): string => directories.join(';');
+
+    expect(ClaudeCliDigest.locateCli({ CLAUDE_CLI_PATH: 'C:\\cli\\claude.exe', PATH: path(native) }, 'win32')).toBe('C:\\cli\\claude.exe');
+    expect(ClaudeCliDigest.locateCli({ PATH: path(empty, broken, npm, native) }, 'win32')).toBe(npmBinary);
+    expect(ClaudeCliDigest.locateCli({ PATH: path(native, npm) }, 'win32')).toBe(join(native, 'claude.exe'));
+    expect(ClaudeCliDigest.locateCli({ PATH: path(empty, broken) }, 'win32')).toBe('claude');
+    expect(ClaudeCliDigest.locateCli({}, 'win32')).toBe('claude');
+    expect(ClaudeCliDigest.locateCli({ PATH: path(npm) }, 'darwin')).toBe('claude');
   });
 });

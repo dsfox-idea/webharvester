@@ -104,8 +104,10 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   model with the user's sign-in and about 6x fewer tokens than the default
   prompt; `--bare` would need `ANTHROPIC_API_KEY`.
 - On Windows `claude` on PATH is an npm `.cmd` shim that `spawn` cannot run
-  without a shell; Claude Code passes its binary to children (MCP servers
-  included) as `CLAUDE_CODE_EXECPATH`.
+  without a shell. Claude Code 2.1.280 sets `CLAUDE_CODE_EXECPATH` only in its
+  Bash tool's shell: MCP servers, the PowerShell tool and `claude.exe` itself
+  lack it (read from each process's environment block). Check a variable in
+  the process that uses it, never in the Bash tool.
 - `innerText` leaves out shadow DOM content; walk the flat tree
   (`shadowRoot`, `slot.assignedNodes`) to read web components.
 - The built-in `WebFetch` cannot read PDFs (its model gets the raw bytes),

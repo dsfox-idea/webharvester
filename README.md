@@ -99,7 +99,8 @@ page. With `prompt`, like the built-in `WebFetch`, the page goes to Claude
 Haiku (the model `WebFetch` uses) and only the answer comes back: the server
 runs `claude -p --safe-mode --model haiku --tools ""` with the user's own
 Claude Code sign-in (Claude Code offers no MCP sampling), so no API key is
-needed; the CLI is found through `CLAUDE_CLI_PATH` or `CLAUDE_CODE_EXECPATH`.
+needed; the CLI is `CLAUDE_CLI_PATH`, else `claude` on PATH (on Windows the
+binary behind npm's `claude.cmd` shim).
 
 `web_search` takes `allowed_domains` / `blocked_domains` (sent as `site:`
 operators and checked again on every result) and returns up to 10 results. It

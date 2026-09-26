@@ -35,10 +35,11 @@ The webharvester extension (which declares every working permission) can run
 two ways:
 
 - **Standalone, manual.** Load the extension into any Chromium browser:
-  chrome://extensions -> Developer mode -> Load unpacked, or launch with
-  `--load-extension=<path>`. Install this skill/plugin separately. A
-  command-line-loaded unpacked extension does not persist across restarts, so
-  either keep launching with the flag or use the one-time Load unpacked.
+  chrome://extensions -> Developer mode -> Load unpacked. Install this
+  skill/plugin separately. Launching with `--load-extension=<path>` also
+  works, except in Google Chrome 137+ (which ignores the flag) and with
+  Enhanced Safe Browsing on; an extension loaded that way does not persist
+  across restarts, so keep launching with the flag.
 - **With Growser (default).** [Growser](https://growser.org) is the default
   browser of the webharvester tool for Claude Code (Windows, macOS, Linux). It
   ships the extension bundled and enables it with a single launch argument,

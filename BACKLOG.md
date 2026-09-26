@@ -29,9 +29,3 @@ passes):
 
 Before submitting: run `claude plugin validate ./plugin --strict`, and if the
 permission set was re-measured, `npm run build-guides` first.
-
-## Defects found in the 2026-09-23 project review (not fixed)
-
-- **`--load-extension` advice contradicts CLAUDE.md.** README ("Two ways to
-  use", "Install") offers `--load-extension=extension` for any Chromium
-  browser, while CLAUDE.md records that branded Chrome 137+ ignores it.

@@ -28,7 +28,8 @@ The permission guides in this skill are static reference text and need no
 browser. The measuring extension they describe runs two ways:
 
 - **Standalone (manual).** Load the extension into any Chromium browser with
-  `--load-extension` or chrome://extensions -> Load unpacked.
+  chrome://extensions -> Developer mode -> Load unpacked (`--load-extension`
+  also works, except in Google Chrome 137+ and with Enhanced Safe Browsing on).
 - **With Growser (default).** [Growser](https://growser.org) is the default
   browser of the webharvester tool (Windows, macOS, Linux). It ships the
   extension bundled and turns it on with `--enable-webharvester`, so no

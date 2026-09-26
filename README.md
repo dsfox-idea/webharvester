@@ -20,9 +20,11 @@ Claude Code plugin) is the capability reference so Claude knows which one to use
 ## Two ways to use
 
 - **On its own (manual).** Load `extension/` into any Chromium browser
-  (chrome://extensions -> Developer mode -> Load unpacked, or launch with
-  `--load-extension=extension`) and install the skill/plugin separately. Works
-  anywhere, but you wire the pieces up yourself.
+  (chrome://extensions -> Developer mode -> Load unpacked) and install the
+  skill/plugin separately. Launching with `--load-extension=extension` also
+  works, except in Google Chrome 137+ (which ignores the flag) and in a
+  profile with Enhanced Safe Browsing on. Works anywhere, but you wire the
+  pieces up yourself.
 - **With Growser (default, automatic).** [Growser](https://growser.org) ships
   this extension bundled and turns it on with a single launch argument,
   `--enable-webharvester`. Growser is the default browser of the webharvester
@@ -80,7 +82,7 @@ and rebuilds the guides. It installs Growser (the default browser of the
 webharvester tool, for Windows, macOS and Linux) and writes a launcher that
 starts it with `--enable-webharvester`, which enables the bundled extension.
 For any other Chromium browser, use manual mode: load `extension/` from
-chrome://extensions, or launch with `--load-extension=extension`.
+chrome://extensions (Developer mode -> Load unpacked).
 
 ## Web search and fetch through Growser
 

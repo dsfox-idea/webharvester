@@ -29,7 +29,7 @@ test.describe('VersionPage', () => {
 
 test.describe('CatalogRepository', () => {
   test('maps a Chromium version to a file under catalog/versions', () => {
-    expect(CatalogRepository.versionPath('151.0.7445.82')).toMatch(/catalog\/versions\/151\.0\.7445\.82\.json$/);
+    expect(CatalogRepository.versionPath('151.0.7445.82')).toMatch(/catalog[\\/]versions[\\/]151\.0\.7445\.82\.json$/);
     expect(() => CatalogRepository.versionPath('151')).toThrow(/not a Chromium version/);
     expect(() => CatalogRepository.versionPath('../etc')).toThrow(/not a Chromium version/);
   });

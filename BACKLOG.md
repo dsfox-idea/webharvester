@@ -32,10 +32,6 @@ permission set was re-measured, `npm run build-guides` first.
 
 ## Defects found in the 2026-09-23 project review (not fixed)
 
-- **Static test fails on Windows.** `tests/static/browser-facts.spec.ts:32`
-  matches `CatalogRepository.versionPath()` against `/catalog\/versions\/...$/`,
-  but `path.join` returns `\` separators on Windows. The code is right; the
-  assertion should accept either separator. All other 46 static tests pass.
 - **`setup.ps1` ignores native command failures.** `$ErrorActionPreference =
   'Stop'` does not apply to external programs (PowerShell 7.6:
   `$PSNativeCommandUseErrorActionPreference` is `False`). So

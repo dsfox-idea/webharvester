@@ -91,7 +91,9 @@ LAUNCH
 }
 
 measure() {
-  have node || die "Node.js is required for --measure. Install Node 20+ and retry."
+  have node || die "Node.js is required for --measure. Install Node 22.18+ and retry."
+  # The scripts are .ts files run by node itself: type stripping is on by default only since 22.18 / 23.6.
+  [ "$(node -p 'Boolean(process.features.typescript)')" = true ] || die "Node $(node -v) cannot run TypeScript files. Install Node 22.18+ and retry."
   have npm  || die "npm is required for --measure."
   local os bin
   os="$(uname -s)"

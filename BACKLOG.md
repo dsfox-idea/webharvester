@@ -32,9 +32,6 @@ permission set was re-measured, `npm run build-guides` first.
 
 ## Defects found in the 2026-09-23 project review (not fixed)
 
-- **Wrong Node minimum.** `setup.sh` and `setup.ps1` ask for "Node 20+", but
-  `node scripts/*.ts` needs built-in type stripping, on by default only since
-  Node 22.18 / 23.6. `package.json` has no `engines`.
 - **Broken install command in `plugin/README.md`.**
   `claude plugin install web-harvester --marketplace <this-repo>`: the CLI has
   no `--marketplace` option; the root README's

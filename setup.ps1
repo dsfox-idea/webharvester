@@ -85,7 +85,9 @@ start "" "$Exe" --enable-webharvester %*
 }
 
 function Invoke-Measure {
-  if (-not (Have 'node')) { Die "Node.js is required for -Measure. Install Node 20+ and retry." }
+  if (-not (Have 'node')) { Die "Node.js is required for -Measure. Install Node 22.18+ and retry." }
+  # The scripts are .ts files run by node itself: type stripping is on by default only since 22.18 / 23.6.
+  if ((node -p 'Boolean(process.features.typescript)') -ne 'true') { Die "Node $(node -v) cannot run TypeScript files. Install Node 22.18+ and retry." }
   if (-not (Have 'npm'))  { Die "npm is required for -Measure." }
   Install-Growser
   $exe = Get-GrowserExe

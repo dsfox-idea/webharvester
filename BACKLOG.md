@@ -32,10 +32,6 @@ permission set was re-measured, `npm run build-guides` first.
 
 ## Defects found in the 2026-09-23 project review (not fixed)
 
-- **Broken install command in `plugin/README.md`.**
-  `claude plugin install web-harvester --marketplace <this-repo>`: the CLI has
-  no `--marketplace` option; the root README's
-  `claude plugin install web-harvester@webharvester` is the working form.
 - **`--load-extension` advice contradicts CLAUDE.md.** README ("Two ways to
   use", "Install") offers `--load-extension=extension` for any Chromium
   browser, while CLAUDE.md records that branded Chrome 137+ ignores it.

@@ -62,7 +62,8 @@ repository README for details.
 ## Install
 
 ```sh
-claude plugin install web-harvester --marketplace <this-repo>
+claude plugin marketplace add dsfox-idea/webharvester
+claude plugin install web-harvester@webharvester
 ```
 
-Or point Claude Code at the repo's `.claude-plugin/marketplace.json`.
+From a clone, `claude plugin marketplace add <path to the clone>` instead.

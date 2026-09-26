@@ -32,13 +32,6 @@ permission set was re-measured, `npm run build-guides` first.
 
 ## Defects found in the 2026-09-23 project review (not fixed)
 
-- **`setup.ps1` ignores native command failures.** `$ErrorActionPreference =
-  'Stop'` does not apply to external programs (PowerShell 7.6:
-  `$PSNativeCommandUseErrorActionPreference` is `False`). So
-  `try { claude plugin marketplace add } catch { ... update }` never reaches
-  `catch`, and in `-Measure` a failed `npm install` / `test:live` still runs
-  `mark-non-working`, `build-manifest` and `build-guides` on a stale or
-  missing report. `setup.sh` chains the same steps with `&&` and stops.
 - **Wrong Node minimum.** `setup.sh` and `setup.ps1` ask for "Node 20+", but
   `node scripts/*.ts` needs built-in type stripping, on by default only since
   Node 22.18 / 23.6. `package.json` has no `engines`.

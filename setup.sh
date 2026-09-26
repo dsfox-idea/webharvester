@@ -103,14 +103,18 @@ measure() {
     *) die "Unsupported OS for --measure: ${os}" ;;
   esac
   log "Installing project dependencies"
-  ( cd "${REPO}" && npm install --no-audit --no-fund )
+  ( cd "${REPO}" && npm install --no-audit --no-fund ) || die "npm install failed."
   log "Measuring the browser and regenerating guides"
+  local report="${REPO}/test-results/probe-report.json"
+  ( cd "${REPO}" && npm run build-manifest -- --full ) || die "npm run build-manifest -- --full failed."
+  rm -f "${report}"
+  # With the full manifest the live tests fail wherever a permission does not work: the report they write is the measurement.
+  ( cd "${REPO}" && CHROME_PATH="${bin}" HEADED=1 npm run test:live ) || warn "Live tests failed, as expected for permissions that do not work here."
+  [ -f "${report}" ] || die "The live run wrote no ${report}."
   ( cd "${REPO}" \
-    && npm run build-manifest -- --full \
-    && CHROME_PATH="${bin}" HEADED=1 npm run test:live \
     && npm run mark-non-working \
     && npm run build-manifest \
-    && npm run build-guides )
+    && npm run build-guides ) || die "Regenerating the manifest and guides from the measurement failed."
   log "Refreshing the installed plugin"
   claude plugin marketplace update "${MARKETPLACE_NAME}" || true
   log "Done. Guides now reflect ${bin}."
@@ -126,7 +130,8 @@ main() {
     esac
   done
   install_plugin
-  [ "${do_measure}" -eq 1 ] && measure || true
+  # Not `&& measure || true`: bash turns set -e off inside a command on the left of ||.
+  if [ "${do_measure}" -eq 1 ]; then measure; fi
   log "All set."
 }
 

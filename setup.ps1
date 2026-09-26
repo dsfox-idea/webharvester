@@ -26,14 +26,21 @@ function Log  ($m) { Write-Host "[setup] $m" -ForegroundColor Cyan }
 function Warn ($m) { Write-Host "[setup] $m" -ForegroundColor Yellow }
 function Die  ($m) { Write-Host "[setup] $m" -ForegroundColor Red; exit 1 }
 function Have ($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
+# $ErrorActionPreference covers cmdlets only: a native command reports failure through its exit code.
+function Assert-Exit ($what) { if ($LASTEXITCODE -ne 0) { throw "$what failed (exit code $LASTEXITCODE)" } }
 
 function Install-Plugin {
   if (-not (Have 'claude')) { Die "Claude Code CLI 'claude' not found. Install it first: https://claude.com/claude-code" }
   $source = if (Test-Path (Join-Path $Repo '.claude-plugin/marketplace.json')) { $Repo } else { $MarketplaceSlug }
   Log "Adding marketplace from $source"
-  try { claude plugin marketplace add "$source" } catch { claude plugin marketplace update $MarketplaceName }
+  claude plugin marketplace add "$source"
+  if ($LASTEXITCODE -ne 0) {
+    claude plugin marketplace update $MarketplaceName
+    Assert-Exit "Adding marketplace $source"
+  }
   Log "Installing $Plugin"
   claude plugin install $Plugin --yes
+  Assert-Exit "Installing $Plugin"
   Log "Plugin installed. It loads as a skill in your next Claude Code session."
 }
 
@@ -84,18 +91,28 @@ function Invoke-Measure {
   $exe = Get-GrowserExe
   New-Launcher -Exe $exe
   Log "Installing project dependencies"
+  $report = Join-Path $Repo 'test-results/probe-report.json'
   Push-Location $Repo
   try {
     npm install --no-audit --no-fund
+    Assert-Exit 'npm install'
     npm run build-manifest -- --full
+    Assert-Exit 'npm run build-manifest -- --full'
     $Env:CHROME_PATH = $exe; $Env:HEADED = '1'
+    Remove-Item $report -ErrorAction SilentlyContinue
+    # With the full manifest the live tests fail wherever a permission does not work: the report they write is the measurement.
     npm run test:live
+    if (-not (Test-Path $report)) { throw "The live run wrote no $report" }
     npm run mark-non-working
+    Assert-Exit 'npm run mark-non-working'
     npm run build-manifest
+    Assert-Exit 'npm run build-manifest'
     npm run build-guides
+    Assert-Exit 'npm run build-guides'
   } finally { Pop-Location }
   Log "Refreshing the installed plugin"
-  try { claude plugin marketplace update $MarketplaceName } catch {}
+  claude plugin marketplace update $MarketplaceName
+  if ($LASTEXITCODE -ne 0) { Warn "Could not refresh the plugin; run: claude plugin marketplace update $MarketplaceName" }
   Log "Done. Guides now reflect $exe."
 }
 

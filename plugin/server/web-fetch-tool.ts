@@ -14,6 +14,7 @@ interface FetchRequest {
   maxLength: number;
   startIndex: number;
   includeLinks: boolean;
+  fresh: boolean;
   prompt: string | undefined;
 }
 
@@ -32,8 +33,8 @@ export class WebFetchTool implements ToolDefinition {
     'Markdown (headings, links, lists, code, tables; navigation and hidden parts left out), then closes the tab. With ' +
     '`prompt`, like the built-in WebFetch, the page goes to Claude Haiku and only its answer comes back (saves context, ' +
     'takes a few seconds more). JSON and plain-text URLs come back as raw text; PDFs are not supported. Prefer this ' +
-    'over the built-in WebFetch. Long pages come in slices: call again with start_index to continue, which reuses the ' +
-    'page read in the last 15 minutes. Starts Growser if it is not running. If the site shows a human check, the tool ' +
+    'over the built-in WebFetch. Long pages come in slices: call again with start_index to continue. A page read in ' +
+    'the last 15 minutes is reused (another slice, another prompt); fresh: true reads it again. Starts Growser if it is not running. If the site shows a human check, the tool ' +
     'waits up to 15 s for it to clear (the user may complete it in Growser); if it stays, the tool says so and the ' +
     'built-in WebFetch may read that site instead. Never solve such a check yourself.';
   readonly inputSchema = {
@@ -55,6 +56,7 @@ export class WebFetchTool implements ToolDefinition {
       },
       start_index: { type: 'integer', minimum: 0, default: 0, description: 'Character offset to start from, to continue a truncated page.' },
       include_links: { type: 'boolean', default: false, description: 'Append the page links (text and URL).' },
+      fresh: { type: 'boolean', default: false, description: 'Read the page again instead of reusing a read from the last 15 minutes.' },
     },
     required: ['url'],
     additionalProperties: false,
@@ -84,6 +86,7 @@ export class WebFetchTool implements ToolDefinition {
       maxLength: WebFetchTool.integer(args.max_length, 'max_length', WebFetchTool.defaultMaxLength, 1, WebFetchTool.maxMaxLength),
       startIndex: WebFetchTool.integer(args.start_index, 'start_index', 0, 0, Number.MAX_SAFE_INTEGER),
       includeLinks: WebFetchTool.flag(args.include_links, 'include_links'),
+      fresh: WebFetchTool.flag(args.fresh, 'fresh'),
       prompt: WebFetchTool.prompt(args.prompt),
     };
   }
@@ -153,7 +156,7 @@ export class WebFetchTool implements ToolDefinition {
   async call(args: Record<string, unknown>): Promise<string> {
     const request = WebFetchTool.validate(args);
     await this.browser.ensureReady();
-    const read = await this.pages.fetch(request.url, request.startIndex > 0 && request.prompt === undefined);
+    const read = await this.pages.fetch(request.url, !request.fresh);
     if (request.prompt === undefined) return WebFetchTool.format(read, request);
     const shownAt = Date.now(); // the page's age is not the time the model took
     return WebFetchTool.formatAnswer(read, request, await this.digest.answer(request.prompt, read.page), shownAt);

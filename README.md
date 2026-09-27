@@ -96,9 +96,10 @@ timing) and the main content as Markdown (headings, links, lists, code, tables;
 `main`/`article` when it holds the content, navigation, banners and hidden
 parts left out, open and closed shadow DOM included). JSON and plain text come back raw; PDFs
 are refused (the built-in `WebFetch` cannot read them either). Text comes in
-slices (`max_length`, `start_index`, optional `include_links`); a continuation
-reuses the snapshot read in the last 15 minutes, a fresh read always opens the
-page. A host that DNS reports as nonexistent (NXDOMAIN, and not in the hosts
+slices (`max_length`, `start_index`, optional `include_links`). A page read in
+the last 15 minutes is reused, as the built-in `WebFetch` caches pages for 15
+minutes: another slice or another `prompt` opens no tab, and the answer says
+how old the read is; `fresh: true` reads the page again. A host that DNS reports as nonexistent (NXDOMAIN, and not in the hosts
 file) fails in about half a second, before any tab opens; Growser itself would
 keep such a tab loading until the 20 s timeout. With `prompt`, like the built-in `WebFetch`, the page goes to Claude
 Haiku (the model `WebFetch` uses) and only the answer comes back: the server

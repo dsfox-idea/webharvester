@@ -58,7 +58,7 @@ test.describe('WebFetchTool', () => {
     }
   });
 
-  test('validates max_length, start_index and include_links', async () => {
+  test('validates max_length, start_index, include_links and fresh', async () => {
     for (const [args, message] of [
       [{ max_length: 0 }, /max_length must be an integer from 1 to 100000/],
       [{ max_length: 100_001 }, /max_length/],
@@ -66,6 +66,7 @@ test.describe('WebFetchTool', () => {
       [{ start_index: -1 }, /start_index must be an integer/],
       [{ start_index: '3' }, /start_index/],
       [{ include_links: 'yes' }, /include_links must be true or false/],
+      [{ fresh: 1 }, /fresh must be true or false/],
       [{ prompt: '  ' }, /prompt must be a non-empty string/],
       [{ prompt: 42 }, /prompt must be a non-empty string/],
       [{ prompt: 'x'.repeat(5001) }, /prompt is longer than 5000 characters/],
@@ -74,12 +75,20 @@ test.describe('WebFetchTool', () => {
     }
   });
 
-  test('starts the browser, reads the page fresh and returns its main content', async () => {
+  test('starts the browser and returns the main content, from a read of the last 15 minutes if there is one', async () => {
     const { recorder, result } = call({ url: '  https://docs.example/page  ' });
     expect(await result).toBe(
       'Title: Docs\nURL: https://docs.example/final\nContent: main content of the page, text/html\nText: characters 0-10 of 10\n\nabcdefghij',
     );
-    expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/page']);
+    expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/page reuse']);
+  });
+
+  test('fresh: true reads the page again', async () => {
+    for (const args of [{ fresh: true }, { fresh: true, prompt: 'What is it?' }, { fresh: true, start_index: 3 }]) {
+      const { recorder, result } = call({ url: 'https://docs.example/', ...args });
+      await result;
+      expect(recorder.calls[1], JSON.stringify(args)).toBe('fetch https://docs.example/');
+    }
   });
 
   test('names an HTTP status outside 2xx, and none the browser did not report', () => {
@@ -107,12 +116,12 @@ test.describe('WebFetchTool', () => {
     );
   });
 
-  test("with a prompt, reads the page fresh and returns only the small model's answer", async () => {
+  test("with a prompt, returns only the small model's answer, from a recent read too", async () => {
     const { recorder, result } = call({ url: 'https://docs.example/', prompt: '  What is it?  ', start_index: 3, max_length: 2 });
     expect(await result).toBe(
       'Title: Docs\nURL: https://docs.example/final\nContent: main content of the page, text/html\n' +
         'Answer: by claude-haiku-test from 10 characters of the page\n\nThe answer.',
     );
-    expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/', 'digest What is it? over 10 chars']);
+    expect(recorder.calls).toEqual(['ensureReady', 'fetch https://docs.example/ reuse', 'digest What is it? over 10 chars']);
   });
 });

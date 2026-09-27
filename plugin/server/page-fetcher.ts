@@ -37,7 +37,8 @@ export class HumanCheck {
  * Reads a page in a visible tab of the user's Growser, with the user's session.
  * A human check is never answered here: HumanCheckGate waits for it or falls back.
  * Snapshots are kept for 15 minutes (as the built-in WebFetch caches pages) so
- * that reading the rest of a long page does not open it again.
+ * that reading the rest of a long page, or asking about it again, does not
+ * open it again.
  */
 export class PageFetcher {
   static readonly settleTimeoutMs = 5_000;
@@ -57,7 +58,7 @@ export class PageFetcher {
     this.hosts = hosts;
   }
 
-  /** `reuse`: a snapshot of this URL from the last 15 minutes will do (continuing a long page). */
+  /** `reuse`: a snapshot of this URL from the last 15 minutes will do (anything but a fresh read). */
   async fetch(url: string, reuse = false): Promise<ReadPage> {
     const cached = this.cache.get(url);
     if (reuse && cached && this.now() - cached.readAt < PageFetcher.cacheTtlMs) {

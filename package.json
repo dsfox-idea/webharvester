@@ -12,6 +12,7 @@
     "test": "playwright test --project=static",
     "test:page": "playwright test --project=page",
     "test:live": "playwright test --project=live",
+    "test:mcp": "playwright test --project=mcp",
     "test:all": "playwright test"
   },
   "license": "MIT",

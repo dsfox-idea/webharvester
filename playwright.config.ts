@@ -9,5 +9,7 @@ export default defineConfig({
     // Code the growser MCP server runs inside pages, exercised in Playwright's bundled Chromium (no extension).
     { name: 'page', testDir: 'tests/page', timeout: 30_000, use: { browserName: 'chromium', headless: true } },
     { name: 'live', testDir: 'tests/live', timeout: 120_000, workers: 1, retries: 0 },
+    // The growser MCP server over stdio, driving the user's running (or started) Growser: opens visible tabs.
+    { name: 'mcp', testDir: 'tests/mcp', timeout: 120_000, workers: 1, retries: 0 },
   ],
 });

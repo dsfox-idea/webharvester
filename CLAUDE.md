@@ -42,6 +42,11 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   `executeScript` from its own source: keep each function self-contained.
   `npm run test:page` runs it in Playwright's bundled Chromium (no extension,
   no Growser); `npm test` stays browser-free.
+- `npm run test:mcp` runs `plugin/server/main.ts` over stdio, as Claude Code
+  does (no `CLAUDE_CODE_EXECPATH`), against a local test site in the running
+  Growser: run it after changing the server or page scripts, since static and
+  page tests inject what only the real process shows (CLI path, DNS, the
+  extension's isolated world).
 - Any change under `plugin/` needs a version bump in both
   `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`:
   installs from GitHub are cached by `version`, and `claude plugin update`

@@ -143,6 +143,8 @@ from another app, so keep the Growser window in view to watch.
 ```sh
 npm install
 npm test                 # static tests
+npm run test:page        # code the MCP server runs in pages, in Playwright's bundled Chromium
+npm run test:mcp         # the growser MCP server end to end, in your Growser (opens tabs; one Haiku call)
 npm run test:live        # live tests in Playwright's bundled Chrome for Testing (headless)
 HEADED=1 npm run test:live
 npm run build-manifest -- --full   # manifest with all 93 names, for measuring a browser

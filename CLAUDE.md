@@ -84,8 +84,9 @@ Playwright tests. Design spec: `docs/superpowers/specs/`. Usage: `README.md`.
   commits (`onBeforeNavigate` arrives together with `onCommitted`). On this
   machine Growser never fails an unresolvable host: the tab stays `loading`
   for minutes with no events, although the system DNS answers NXDOMAIN. So
-  `ExtensionTabs.open` catches fast failures via `onErrorOccurred` and relies
-  on its timeout for the rest.
+  `PageFetcher` asks DNS first (`HostCheck`: a query answers NXDOMAIN in
+  ~60 ms, getaddrinfo in 11 s), `ExtensionTabs.open` catches fast failures
+  via `onErrorOccurred` and relies on its timeout for the rest.
 - A diagnostic `evaluate` that outlives the CDP call timeout (30 s) keeps
   running in the worker and can leave tabs open: keep diagnostics short and
   check the tab strip afterwards.

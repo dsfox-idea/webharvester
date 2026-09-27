@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { OpenTab, TabHandle } from '../../plugin/server/extension-tabs.ts';
 import { FallbackPass } from '../../plugin/server/fallback-pass.ts';
+import type { HostProbe } from '../../plugin/server/host-check.ts';
 import { HumanCheckGate } from '../../plugin/server/human-check-gate.ts';
 import { HumanCheck, PageFetcher, type ReadableTabs } from '../../plugin/server/page-fetcher.ts';
 import { PageScripts, type PageSnapshot } from '../../plugin/server/page-scripts.ts';
@@ -54,6 +55,10 @@ class FakeTabs implements ReadableTabs {
 }
 
 /** A clock the test moves by hand; the gate's `sleep` moves it too. */
+/** A fetcher whose DNS check finds every host unless told otherwise: the fixtures use .example names, which do not exist. */
+const fetcherWith = (tabs: ReadableTabs, now?: () => number, gate?: HumanCheckGate, hosts: HostProbe = { missing: async () => false }): PageFetcher =>
+  new PageFetcher(tabs, now, gate, hosts);
+
 class Clock {
   time = 1_000_000;
 
@@ -69,21 +74,21 @@ const challenge: PageSnapshot = { ...article, title: 'Just a moment...', text: '
 const quickFetcher = (tabs: FakeTabs) => {
   const clock = new Clock();
   const pass = new FallbackPass(join(mkdtempSync(join(tmpdir(), 'page-fetcher-')), 'pass.json'), clock.now);
-  return { pass, fetcher: new PageFetcher(tabs, clock.now, new HumanCheckGate(tabs, pass, clock.now, clock.sleep)) };
+  return { pass, fetcher: fetcherWith(tabs, clock.now, new HumanCheckGate(tabs, pass, clock.now, clock.sleep)) };
 };
 
 test.describe('PageFetcher', () => {
   test('reads the rendered page, then closes the tab and gives focus back', async () => {
     const tabs = new FakeTabs(article);
     const clock = new Clock();
-    expect(await new PageFetcher(tabs, clock.now).fetch('https://news.example/a')).toEqual({ page: article, readAt: clock.time });
+    expect(await fetcherWith(tabs, clock.now).fetch('https://news.example/a')).toEqual({ page: article, readAt: clock.time });
     expect(tabs.calls).toEqual(['open https://news.example/a', 'read 9 snapshot [5000]', 'close 9 back to 2']);
   });
 
   test('a continuation reuses a snapshot younger than 15 minutes; a fresh read always opens the page', async () => {
     const tabs = new FakeTabs(article);
     const clock = new Clock();
-    const fetcher = new PageFetcher(tabs, clock.now);
+    const fetcher = fetcherWith(tabs, clock.now);
     const first = await fetcher.fetch('https://news.example/a');
     clock.time += PageFetcher.cacheTtlMs - 1;
     expect(await fetcher.fetch('https://news.example/a', true)).toBe(first);
@@ -97,7 +102,7 @@ test.describe('PageFetcher', () => {
 
   test('keeps only the most recent snapshots', async () => {
     const tabs = new FakeTabs(article);
-    const fetcher = new PageFetcher(tabs, new Clock().now);
+    const fetcher = fetcherWith(tabs, new Clock().now);
     for (let index = 0; index <= PageFetcher.cacheSize; index += 1) await fetcher.fetch(`https://news.example/${index}`);
     await fetcher.fetch('https://news.example/0', true);
     await fetcher.fetch(`https://news.example/${PageFetcher.cacheSize}`, true);
@@ -133,13 +138,22 @@ test.describe('PageFetcher', () => {
 
   test('closes the tab when the page cannot be read', async () => {
     const tabs = new FakeTabs(new Error('Cannot access contents of url "chrome-error://chromewebdata/"'));
-    await expect(new PageFetcher(tabs).fetch('https://nowhere.example/')).rejects.toThrow(/Could not read https:\/\/nowhere\.example\/ in Growser: Cannot access/);
+    await expect(fetcherWith(tabs).fetch('https://nowhere.example/')).rejects.toThrow(/Could not read https:\/\/nowhere\.example\/ in Growser: Cannot access/);
     expect(tabs.calls.at(-1)).toBe('close 9 back to 2');
+  });
+
+  test('fails at once, opening no tab, when DNS says the host does not exist', async () => {
+    const tabs = new FakeTabs(article);
+    const fetcher = fetcherWith(tabs, undefined, undefined, { missing: async (host) => host === 'gone.example' });
+    await expect(fetcher.fetch('https://gone.example/page')).rejects.toThrow(
+      'Could not load https://gone.example/page: the host gone.example does not exist (DNS answered NXDOMAIN)',
+    );
+    expect(tabs.calls).toEqual([]);
   });
 
   test('refuses a PDF after closing its tab', async () => {
     const tabs = new FakeTabs({ ...article, contentType: 'application/pdf', text: '' });
-    await expect(new PageFetcher(tabs).fetch('https://docs.example/a.pdf')).rejects.toThrow(/is a PDF/);
+    await expect(fetcherWith(tabs).fetch('https://docs.example/a.pdf')).rejects.toThrow(/is a PDF/);
     expect(tabs.calls.at(-1)).toBe('close 9 back to 2');
   });
 });

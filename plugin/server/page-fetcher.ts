@@ -1,5 +1,6 @@
 import type { OpenTab, TabHandle } from './extension-tabs.ts';
 import { FallbackPass } from './fallback-pass.ts';
+import { HostCheck, type HostProbe } from './host-check.ts';
 import { HumanCheckGate } from './human-check-gate.ts';
 import { log } from './log.ts';
 import { PageScripts, type PageSnapshot } from './page-scripts.ts';
@@ -46,12 +47,14 @@ export class PageFetcher {
   private readonly tabs: ReadableTabs;
   private readonly now: () => number;
   private readonly gate: HumanCheckGate;
+  private readonly hosts: HostProbe;
   private readonly cache = new Map<string, ReadPage>();
 
-  constructor(tabs: ReadableTabs, now: () => number = Date.now, gate: HumanCheckGate = new HumanCheckGate(tabs)) {
+  constructor(tabs: ReadableTabs, now: () => number = Date.now, gate: HumanCheckGate = new HumanCheckGate(tabs), hosts: HostProbe = new HostCheck()) {
     this.tabs = tabs;
     this.now = now;
     this.gate = gate;
+    this.hosts = hosts;
   }
 
   /** `reuse`: a snapshot of this URL from the last 15 minutes will do (continuing a long page). */
@@ -69,6 +72,11 @@ export class PageFetcher {
   }
 
   private async read(url: string): Promise<PageSnapshot> {
+    const { hostname } = new URL(url);
+    if (await this.hosts.missing(hostname)) {
+      log(`fetch ${url}: DNS says ${hostname} does not exist`);
+      throw new Error(`Could not load ${url}: the host ${hostname} does not exist (DNS answered NXDOMAIN)`);
+    }
     const tab = await this.tabs.open(url);
     const first = await this.snapshot(tab);
     const page = await this.gate.pass(tab, first.url, first, HumanCheck.detect, () => this.snapshot(tab), {

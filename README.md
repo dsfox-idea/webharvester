@@ -98,7 +98,9 @@ parts left out, open and closed shadow DOM included). JSON and plain text come b
 are refused (the built-in `WebFetch` cannot read them either). Text comes in
 slices (`max_length`, `start_index`, optional `include_links`); a continuation
 reuses the snapshot read in the last 15 minutes, a fresh read always opens the
-page. With `prompt`, like the built-in `WebFetch`, the page goes to Claude
+page. A host that DNS reports as nonexistent (NXDOMAIN, and not in the hosts
+file) fails in about half a second, before any tab opens; Growser itself would
+keep such a tab loading until the 20 s timeout. With `prompt`, like the built-in `WebFetch`, the page goes to Claude
 Haiku (the model `WebFetch` uses) and only the answer comes back: the server
 runs `claude -p --safe-mode --model haiku --tools ""` with the user's own
 Claude Code sign-in (Claude Code offers no MCP sampling), so no API key is
